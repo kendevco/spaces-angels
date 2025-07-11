@@ -63,12 +63,13 @@ This platform enables a new economic model where:
 
 ## 📚 Documentation
 
-Comprehensive documentation available in `/docs`:
-- Platform Architecture
-- Guardian Angel System Design
-- Leo AI Integration Guide
-- Revenue Sharing Models
-- API Documentation
+**[📖 Complete Documentation Hub →](docs/README.md)**
+
+Comprehensive guides organized by audience:
+- **Business Owners** - Getting started, revenue models, zero-friction operations
+- **Developers** - Architecture, APIs, database integration, implementation status
+- **AI Enthusiasts** - Leo AI system, browser automation, federated intelligence
+- **Administrators** - Tenant control, configuration management, template factory
 
 ## 🎯 Immediate Priorities
 
@@ -77,13 +78,26 @@ Comprehensive documentation available in `/docs`:
 3. **Mobile Experience** - Ensuring field workers can use effectively
 4. **Analytics Dashboard** - Real-time business insights
 
-## 💡 For Developers
+## 💡 For Developers & AI Agents
 
-This codebase is designed for AI-assisted development. Use Cursor's AI agents for:
-- Automated testing
-- Documentation generation
-- Code optimization
-- Feature implementation
+This codebase is designed for distributed AI-assisted development:
+
+### Cursor AI Integration
+- Automated testing and code optimization
+- Feature implementation with context awareness
+- Real-time TypeScript error resolution
+
+### Google Jules Collaboration
+- **[📋 Jules Work Queue →](docs/jules-work-requests/)** - Structured tasks for async development
+- Bug fixes, small feature requests, documentation updates
+- Direct GitHub export with comprehensive context
+- Distributed development across AI agents
+
+### Development Workflow
+1. **Identify Tasks** - Break down features into Jules-compatible work items
+2. **Create Work Requests** - Structured docs with context and requirements
+3. **Parallel Development** - Multiple AI agents working simultaneously
+4. **Integration & Review** - Merge and validate distributed contributions
 
 ## 🌐 Community & Support
 
