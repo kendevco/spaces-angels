@@ -1,103 +1,124 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload/types'
+// Import the newly created types
+import {
+  MessageContent,
+  // DynamicWidget, // Included in MessageContent
+  // SystemMessageData, // Included in MessageContent
+  // ActionMessageData, // Included in MessageContent
+  // MessageMetadata, // Included in MessageContent
+} from '../types/messages'
+import { ConversationContext } from '../types/conversation'
+import { BusinessIntelligenceData } from '../types/business-intelligence'
 
 export const Messages: CollectionConfig = {
   slug: 'messages',
   admin: {
-    useAsTitle: 'content',
-    defaultColumns: ['content', 'messageType', 'space', 'author', 'createdAt'],
+    useAsTitle: 'id', // Changed from 'content' as content is now a JSON object
+    defaultColumns: ['messageType', 'sender', 'space', 'channel', 'priority', 'createdAt'],
     group: 'Collaboration',
-    description: 'Real-time messaging system with threading, reactions, and rich content support',
+    description: 'Enhanced messaging system with rich JSON content, conversation context, and BI.',
   },
   access: {
-    // Tenant-scoped access control
     create: ({ req }) => {
-      if (req.user?.globalRole === 'super_admin') return true
-      // TODO: Implement proper tenant-based access using TenantMemberships
-      if (req.user?.globalRole === 'platform_admin') return true
-      return false
+      // Authenticated users can create messages
+      return Boolean(req.user);
     },
     read: ({ req }) => {
-      if (req.user?.globalRole === 'super_admin') return true
-      // TODO: Implement proper tenant-based filtering using TenantMemberships
-      if (req.user?.globalRole === 'platform_admin') return true
-      return false
+      // Ensure users can only read messages from their spaces
+      // This assumes req.user has a 'spaces' array of IDs.
+      // If req.user is not defined, or has no spaces, they can't read any messages.
+      if (!req.user || !req.user.spaces || req.user.spaces.length === 0) {
+        // Super admins might have different rules, adjust if necessary
+        if (req.user?.globalRole === 'super_admin') return true;
+        return false;
+      }
+      return {
+        space: {
+          in: req.user.spaces,
+        },
+      };
     },
     update: ({ req }) => {
-      if (req.user?.globalRole === 'super_admin') return true
-      // TODO: Implement proper tenant-based access using TenantMemberships
-      if (req.user?.globalRole === 'platform_admin') return true
-      return false
+      // Users can only update their own messages
+      // Super admins might have different rules, adjust if necessary
+      if (req.user?.globalRole === 'super_admin') return true;
+      return {
+        sender: {
+          equals: req.user?.id,
+        },
+      };
     },
     delete: ({ req }) => {
-      if (req.user?.globalRole === 'super_admin') return true
-      if (req.user?.globalRole === 'platform_admin') return true
-      return false
+      // Similar to update, users can only delete their own messages
+      // Or specific roles like space admins / super_admins
+      if (req.user?.globalRole === 'super_admin') return true;
+      // Add more role-based delete permissions if needed, e.g. space admins
+      return {
+        sender: {
+          equals: req.user?.id,
+        },
+      };
     },
   },
   fields: [
-    // AT Protocol Core Fields
+    // Core Message Fields from requirements
     {
-      name: 'atProtocol',
-      type: 'group',
-      label: 'AT Protocol Data',
-      admin: {
-        description: 'BlueSky/AT Protocol compatibility fields',
-      },
-      fields: [
-        {
-          name: 'type',
-          type: 'text',
-          required: true,
-          defaultValue: 'co.kendev.spaces.message',
-          admin: {
-            description: 'AT Protocol record type (lexicon)',
-            readOnly: true,
-          },
-        },
-        {
-          name: 'did',
-          type: 'text',
-          admin: {
-            description: 'Decentralized identifier for this message',
-            readOnly: true,
-          },
-        },
-        {
-          name: 'uri',
-          type: 'text',
-          admin: {
-            description: 'AT Protocol URI for this record',
-            readOnly: true,
-          },
-        },
-        {
-          name: 'cid',
-          type: 'text',
-          admin: {
-            description: 'Content identifier hash',
-            readOnly: true,
-          },
-        },
-      ],
+      name: 'content', // Enhanced JSON content structure
+      type: 'json', // Storing as JSON, validation via hooks or Payload's JSON field validation
+      required: true,
+      // admin: {
+      //   description: 'Rich JSON content of the message (text, widgets, system data, etc.)',
+      //   components: { // Potentially add a custom component for better JSON editing/viewing
+      //     Field: CustomJsonViewComponent, // Example
+      //   },
+      // },
+      // TODO: Add Payload JSON validation if possible, or rely on hooks
+      // validate: (value: MessageContent) => {
+      //   // Use MessageProcessor.validateContent(value) here
+      //   // This requires MessageProcessor to be available in this scope
+      //   // For now, basic validation:
+      //   if (!value || !value.type) return "Content type is required.";
+      //   return true;
+      // }
     },
-
-    // Core Message Fields
     {
-      name: 'author',
+      name: 'conversationContext', // Conversation state and context
+      type: 'json',
+      // admin: {
+      //   description: 'Context of the conversation (intent, phase, history).',
+      //   components: {
+      //     Field: CustomJsonViewComponent, // Example
+      //   },
+      // }
+      // validate: (value: ConversationContext) => { /* Basic validation */ return true; }
+    },
+    {
+      name: 'businessIntelligence', // Business metrics and insights
+      type: 'json',
+      // admin: {
+      //   description: 'Embedded Business Intelligence data.',
+      //   components: {
+      //     Field: CustomJsonViewComponent, // Example
+      //   },
+      // }
+      // validate: (value: BusinessIntelligenceData) => { /* Basic validation */ return true; }
+    },
+    {
+      name: 'sender', // Renamed from 'author' to match requirements
       type: 'relationship',
       relationTo: 'users',
       required: true,
-      admin: {
-        description: 'User who created this message',
-      },
+      // admin: {
+      //   description: 'User who sent this message.',
+      // },
+      // Retaining auto-set hook from original, but changing name from 'author' to 'sender'
       hooks: {
         beforeValidate: [
           ({ req, data }) => {
-            // Auto-set author from current user
-            if (data && !data.author && req.user?.id) {
-              return req.user.id
+            if (data && !data.sender && req.user?.id) {
+              return req.user.id;
             }
-            return data?.author
+            return data?.sender;
           },
         ],
       },
@@ -107,613 +128,186 @@ export const Messages: CollectionConfig = {
       type: 'relationship',
       relationTo: 'spaces',
       required: true,
-      admin: {
-        description: 'Space this message belongs to',
-      },
+      // admin: {
+      //   description: 'Space this message belongs to.',
+      // },
     },
     {
-      name: 'channel',
-      type: 'text',
-      admin: {
-        description: 'Channel within the space (optional)',
-      },
-    },
-
-    // Legacy tenant field for backward compatibility
-    {
-      name: 'tenant',
+      name: 'channel', // Kept as relationship from requirements, was text previously
       type: 'relationship',
-      relationTo: 'tenants',
-      admin: {
-        description: 'Legacy tenant field - derived from space.tenant',
-        readOnly: true,
-      },
-      hooks: {
-        beforeValidate: [
-          ({ req, data }) => {
-            // Note: Tenant assignment should be done manually through the admin interface
-            // since the User type doesn't include tenant information directly
-            return data?.tenant
-          },
-        ],
-      },
-    },
-
-    // Message Content
-    {
-      name: 'content',
-      type: 'textarea',
-      required: true,
-      admin: {
-        description: 'The actual message content',
-      },
+      relationTo: 'channels', // Assuming a 'channels' collection exists
+      // admin: {
+      //   description: 'Channel within the space (optional).',
+      // },
     },
     {
       name: 'messageType',
       type: 'select',
-      required: true,
       options: [
-        { label: 'Text', value: 'text' },
-        { label: 'Image', value: 'image' },
-        { label: 'File', value: 'file' },
-        { label: 'Widget', value: 'widget' },
-        { label: 'System', value: 'system' },
-        { label: 'Announcement', value: 'announcement' },
-        { label: 'AI Agent', value: 'ai_agent' },
-        { label: 'Web Chat', value: 'web_chat' },
-        { label: 'Voice AI', value: 'voice_ai' },
-        { label: 'Customer Inquiry', value: 'customer_inquiry' },
-        { label: 'Live Handoff', value: 'live_handoff' },
-        { label: 'System Alert', value: 'system_alert' },
+        { label: 'User Message', value: 'user' }, // User-generated content
+        { label: 'Leo AI Response', value: 'leo' }, // AI-generated response
+        { label: 'System Message', value: 'system' }, // Automated system event
+        { label: 'Action Result', value: 'action' }, // Outcome of an automated action
+        { label: 'Business Intelligence', value: 'intelligence' } // BI data embed
       ],
-      defaultValue: 'text',
-      admin: {
-        description: 'Type of message for proper handling and display',
-      },
-    },
-
-    // Widget Content Support
-    {
-      name: 'widgetData',
-      type: 'group',
-      label: 'Widget Content',
-      admin: {
-        description: 'Interactive widget content embedded in the message',
-        condition: (data) => data.messageType === 'widget',
-      },
-      fields: [
-        {
-          name: 'widgetType',
-          type: 'select',
-          required: true,
-          options: [
-            { label: 'Address Verification', value: 'address_verification' },
-            { label: 'Web Capture', value: 'web_capture' },
-            { label: 'Order Form', value: 'order_form' },
-            { label: 'Approval Workflow', value: 'approval_workflow' },
-            { label: 'Poll/Survey', value: 'poll' },
-            { label: 'Calendar Booking', value: 'calendar_booking' },
-            { label: 'Payment Request', value: 'payment_request' },
-            { label: 'Document Signature', value: 'document_signature' },
-            { label: 'Custom Widget', value: 'custom' },
-          ],
-          admin: {
-            description: 'Type of widget to display',
-          },
-        },
-        {
-          name: 'widgetTitle',
-          type: 'text',
-          admin: {
-            description: 'Display title for the widget',
-          },
-        },
-        {
-          name: 'widgetData',
-          type: 'json',
-          admin: {
-            description: 'Widget-specific data and configuration',
-          },
-        },
-        {
-          name: 'isInteractive',
-          type: 'checkbox',
-          defaultValue: true,
-          admin: {
-            description: 'Whether users can interact with this widget',
-          },
-        },
-        {
-          name: 'allowedRoles',
-          type: 'select',
-          hasMany: true,
-          options: [
-            { label: 'All Members', value: 'all' },
-            { label: 'Admins Only', value: 'admin' },
-            { label: 'Space Owners', value: 'owner' },
-            { label: 'Moderators', value: 'moderator' },
-          ],
-          defaultValue: ['all'],
-          admin: {
-            description: 'Who can interact with this widget',
-          },
-        },
-        {
-          name: 'expiresAt',
-          type: 'date',
-          admin: {
-            description: 'When this widget expires (optional)',
-          },
-        },
-        {
-          name: 'responses',
-          type: 'json',
-          admin: {
-            description: 'User responses/interactions with the widget',
-            readOnly: true,
-          },
-        },
-      ],
-    },
-
-    // Threading Support
-    {
-      name: 'parentMessage',
-      type: 'relationship',
-      relationTo: 'messages',
-      admin: {
-        description: 'Parent message if this is a reply',
-      },
-    },
-    {
-      name: 'threadReplies',
-      type: 'relationship',
-      relationTo: 'messages',
-      hasMany: true,
-      admin: {
-        description: 'Replies to this message',
-        readOnly: true,
-      },
-    },
-
-    // Rich Content Support
-    {
-      name: 'attachments',
-      type: 'relationship',
-      relationTo: 'media',
-      hasMany: true,
-      admin: {
-        description: 'Attached files, images, or media',
-      },
-    },
-    {
-      name: 'mentions',
-      type: 'relationship',
-      relationTo: 'users',
-      hasMany: true,
-      admin: {
-        description: 'Users mentioned in this message',
-      },
-    },
-    {
-      name: 'reactions',
-      type: 'array',
-      fields: [
-        {
-          name: 'emoji',
-          type: 'text',
-          required: true,
-          admin: {
-            description: 'Emoji used for reaction',
-          },
-        },
-        {
-          name: 'users',
-          type: 'relationship',
-          relationTo: 'users',
-          hasMany: true,
-          admin: {
-            description: 'Users who reacted with this emoji',
-          },
-        },
-        {
-          name: 'count',
-          type: 'number',
-          defaultValue: 0,
-          admin: {
-            description: 'Number of reactions',
-            readOnly: true,
-          },
-        },
-      ],
-      admin: {
-        description: 'Emoji reactions to this message',
-      },
-    },
-
-    // Moderation
-    {
-      name: 'isEdited',
-      type: 'checkbox',
-      defaultValue: false,
-      admin: {
-        description: 'Whether this message has been edited',
-        readOnly: true,
-      },
-    },
-    {
-      name: 'editHistory',
-      type: 'array',
-      fields: [
-        {
-          name: 'content',
-          type: 'textarea',
-          required: true,
-          admin: {
-            description: 'Previous content',
-          },
-        },
-        {
-          name: 'editedAt',
-          type: 'date',
-          required: true,
-          admin: {
-            description: 'When the edit was made',
-          },
-        },
-        {
-          name: 'editedBy',
-          type: 'relationship',
-          relationTo: 'users',
-          admin: {
-            description: 'Who made the edit',
-          },
-        },
-      ],
-      admin: {
-        description: 'History of edits to this message',
-        condition: (data) => data.isEdited === true,
-      },
-    },
-    {
-      name: 'isDeleted',
-      type: 'checkbox',
-      defaultValue: false,
-      admin: {
-        description: 'Whether this message has been deleted',
-      },
-    },
-    {
-      name: 'deletedBy',
-      type: 'relationship',
-      relationTo: 'users',
-      admin: {
-        description: 'Who deleted this message',
-        condition: (data) => data.isDeleted === true,
-      },
-    },
-    {
-      name: 'deletedAt',
-      type: 'date',
-      admin: {
-        description: 'When this message was deleted',
-        condition: (data) => data.isDeleted === true,
-      },
-    },
-
-    // Timestamp
-    {
-      name: 'timestamp',
-      type: 'date',
       required: true,
-      defaultValue: () => new Date().toISOString(),
-      admin: {
-        description: 'Message timestamp',
-      },
-    },
-
-    // Progressive JSON Metadata Structure
-    {
-      name: 'metadata',
-      type: 'json',
-      admin: {
-        description: 'Progressive JSON structure for extensible metadata',
-      },
-    },
-
-    // Business Context
-    {
-      name: 'businessContext',
-      type: 'group',
-      label: 'Business Context',
-      fields: [
-        {
-          name: 'department',
-          type: 'select',
-          options: [
-            { label: 'Sales', value: 'sales' },
-            { label: 'Support', value: 'support' },
-            { label: 'Operations', value: 'operations' },
-            { label: 'Marketing', value: 'marketing' },
-            { label: 'General', value: 'general' },
-          ],
-        },
-        {
-          name: 'workflow',
-          type: 'select',
-          options: [
-            { label: 'Lead Generation', value: 'lead' },
-            { label: 'Quote Process', value: 'quote' },
-            { label: 'Sale Transaction', value: 'sale' },
-            { label: 'Fulfillment', value: 'fulfillment' },
-            { label: 'Support Request', value: 'support' },
-            { label: 'Knowledge Sharing', value: 'knowledge' },
-          ],
-        },
-        {
-          name: 'customerJourney',
-          type: 'select',
-          options: [
-            { label: 'Discovery', value: 'discovery' },
-            { label: 'Consideration', value: 'consideration' },
-            { label: 'Purchase Intent', value: 'purchase_intent' },
-            { label: 'Active Customer', value: 'active_customer' },
-            { label: 'Support Request', value: 'support_request' },
-            { label: 'Retention Risk', value: 'retention_risk' },
-          ],
-          admin: {
-            description: 'Customer journey stage for this interaction',
-          },
-        },
-        {
-          name: 'integrationSource',
-          type: 'select',
-          options: [
-            { label: 'Web Chat Widget', value: 'web_widget' },
-            { label: 'VAPI Voice Call', value: 'vapi_call' },
-            { label: 'Internal Chat', value: 'internal_chat' },
-            { label: 'Email Integration', value: 'email' },
-            { label: 'API Webhook', value: 'api_webhook' },
-          ],
-          admin: {
-            description: 'Source system for this message',
-          },
-        },
-        {
-          name: 'priority',
-          type: 'select',
-          options: [
-            { label: 'Low', value: 'low' },
-            { label: 'Normal', value: 'normal' },
-            { label: 'High', value: 'high' },
-            { label: 'Urgent', value: 'urgent' },
-          ],
-          defaultValue: 'normal',
-        },
-      ],
-    },
-
-    // Knowledge Repository Features
-    {
-      name: 'knowledge',
-      type: 'group',
-      label: 'Knowledge Repository',
-      fields: [
-        {
-          name: 'searchable',
-          type: 'checkbox',
-          defaultValue: true,
-          admin: {
-            description: 'Include in knowledge search results',
-          },
-        },
-        {
-          name: 'category',
-          type: 'select',
-          options: [
-            { label: 'FAQ', value: 'faq' },
-            { label: 'Procedure', value: 'procedure' },
-            { label: 'Customer Data', value: 'customer_data' },
-            { label: 'Product Info', value: 'product_info' },
-            { label: 'Best Practice', value: 'best_practice' },
-            { label: 'Training', value: 'training' },
-          ],
-        },
-        {
-          name: 'tags',
-          type: 'text',
-          hasMany: true,
-          admin: {
-            description: 'Tags for categorization and search',
-          },
-        },
-        {
-          name: 'embedding',
-          type: 'json',
-          admin: {
-            description: 'AI vector embedding for semantic search',
-            readOnly: true,
-          },
-        },
-      ],
-    },
-
-    // Threading Support
-    {
-      name: 'thread',
-      type: 'relationship',
-      relationTo: 'messages',
-      admin: {
-        description: 'Parent message for threading',
-      },
+      defaultValue: 'user',
+      // admin: {
+      //   description: 'Primary classification of the message content.',
+      // },
     },
     {
-      name: 'threadRoot',
-      type: 'relationship',
-      relationTo: 'messages',
-      admin: {
-        description: 'Root message of the thread',
-      },
-    },
-
-    // Rich Content Support (AT Protocol Embeds)
-    {
-      name: 'embeds',
-      type: 'group',
-      label: 'Rich Content',
-      fields: [
-        {
-          name: 'media',
-          type: 'upload',
-          relationTo: 'media',
-          hasMany: true,
-          admin: {
-            description: 'Images, videos, files attached to this message',
-          },
-        },
-        {
-          name: 'links',
-          type: 'array',
-          fields: [
-            {
-              name: 'url',
-              type: 'text',
-              required: true,
-            },
-            {
-              name: 'title',
-              type: 'text',
-            },
-            {
-              name: 'description',
-              type: 'textarea',
-            },
-          ],
-        },
-      ],
-    },
-
-    // Federation Settings
-    {
-      name: 'federation',
-      type: 'group',
-      label: 'Federation Settings',
-      fields: [
-        {
-          name: 'discoverable',
-          type: 'checkbox',
-          defaultValue: false,
-          admin: {
-            description: 'Make this message discoverable on federated networks',
-          },
-        },
-        {
-          name: 'crossPostTo',
-          type: 'select',
-          hasMany: true,
-          options: [
-            { label: 'BlueSky', value: 'app.bsky.feed.post' },
-            { label: 'Mastodon', value: 'mastodon' },
-            { label: 'ActivityPub', value: 'activitypub' },
-          ],
-          admin: {
-            description: 'Platforms to cross-post this message to',
-          },
-        },
-        {
-          name: 'audience',
-          type: 'select',
-          options: [
-            { label: 'Private', value: 'private' },
-            { label: 'Business Network', value: 'business_network' },
-            { label: 'Public', value: 'public' },
-          ],
-          defaultValue: 'private',
-        },
-      ],
-    },
-
-    // AI Agent Context (From Constitution)
-    {
-      name: 'aiAgent',
-      type: 'group',
-      label: 'AI Agent Context',
-      fields: [
-        {
-          name: 'ceoAnalysis',
-          type: 'json',
-          admin: {
-            description: 'Analysis from tenant Business AI agent',
-            readOnly: true,
-          },
-        },
-        {
-          name: 'suggestedActions',
-          type: 'textarea',
-          admin: {
-            description: 'AI-suggested follow-up actions',
-            readOnly: true,
-          },
-        },
-        {
-          name: 'pipedreamIndex',
-          type: 'number',
-          admin: {
-            description: 'Pipedream Index value for this message',
-            readOnly: true,
-          },
-        },
-      ],
-    },
-
-    // Language Support (AT Protocol)
-    {
-      name: 'langs',
+      name: 'priority',
       type: 'select',
-      hasMany: true,
       options: [
-        { label: 'English', value: 'en' },
-        { label: 'Spanish', value: 'es' },
-        { label: 'French', value: 'fr' },
-        { label: 'German', value: 'de' },
+        { label: 'Low', value: 'low' },
+        { label: 'Normal', value: 'normal' },
+        { label: 'High', value: 'high' },
+        { label: 'Urgent', value: 'urgent' }
       ],
-      defaultValue: ['en'],
+      defaultValue: 'normal',
+      // admin: {
+      //   description: 'Priority level of the message.',
+      // },
     },
-  ],
+    {
+      name: 'readBy', // Users who have read this message
+      type: 'relationship',
+      relationTo: 'users',
+      hasMany: true,
+      // admin: {
+      //   description: 'Users who have marked this message as read.',
+      // },
+    },
+    {
+      name: 'reactions', // User reactions and feedback (e.g., emoji, likes)
+      type: 'json', // Flexible structure for reactions
+      // admin: {
+      //   description: 'User reactions to the message (e.g., emojis, upvotes).',
+      //   components: {
+      //     Field: CustomJsonViewComponent, // Example
+      //   },
+      // }
+      // Example structure for reactions:
+      // { "👍": ["userId1", "userId2"], "❤️": ["userId3"] }
+      // or [{ emoji: "👍", users: ["userId1"], count: 1 }] like original
+    },
+    {
+      name: 'threadId', // For message threading (can be ID of the root message in a thread)
+      type: 'text', // Could also be a relationship to itself if we want strict parent-child
+      index: true,
+      // admin: {
+      //   description: 'Identifier for the message thread this message belongs to.',
+      // },
+    },
+    {
+      name: 'replyToId', // For message replies
+      type: 'relationship',
+      relationTo: 'messages', // Self-relation for replies
+      // admin: {
+      //   description: 'The specific message ID this message is a reply to.',
+      // },
+    },
 
+    // Retaining some potentially useful fields from the original structure,
+    // if they don't conflict and add value.
+    // AT Protocol fields seem specific, keeping them for now.
+    {
+      name: 'atProtocol',
+      type: 'group',
+      label: 'AT Protocol Data',
+      admin: {
+        description: 'BlueSky/AT Protocol compatibility fields',
+        position: 'sidebar', // Moving to sidebar to de-clutter main form
+      },
+      fields: [
+        { name: 'type', type: 'text', defaultValue: 'co.kendev.spaces.message', admin: { readOnly: true } },
+        { name: 'did', type: 'text', admin: { readOnly: true } },
+        { name: 'uri', type: 'text', admin: { readOnly: true } },
+        { name: 'cid', type: 'text', admin: { readOnly: true } },
+      ],
+    },
+    {
+      name: 'attachments', // This can store references to media/files
+      type: 'relationship',
+      relationTo: 'media', // Assuming a 'media' collection for uploads
+      hasMany: true,
+      // admin: {
+      //   description: 'Files or media attached to this message, referenced in content.metadata.attachments.',
+      // },
+    },
+    // The 'timestamp' field is automatically handled by `timestamps: true` below.
+    // The 'metadata' field in the original can be covered by content.metadata or other specific fields.
+    // Removing original 'widgetData', 'parentMessage', 'threadReplies', 'mentions',
+    // 'isEdited', 'editHistory', 'isDeleted', etc. as the new structure aims to consolidate
+    // or handle these differently (e.g., content.widgets, threadId/replyToId).
+  ],
   hooks: {
-    beforeValidate: [
-      // Auto-generate AT Protocol fields
+    beforeChange: [
+      // TODO: Validate JSON content structure (using MessageProcessor.validateContent)
+      // TODO: Generate conversation context (using MessageProcessor.generateConversationContext)
+      // TODO: Process business intelligence data (using MessageProcessor.extractBusinessIntelligence)
+
+      // Retaining AT Protocol hook from original, ensuring it uses 'sender' if that's the new field name for author
       async ({ data, operation, req }) => {
-        if (operation === 'create') {
-          // Generate DID for the message author if not exists
-          if (data && !data.atProtocol?.did && req.user) {
-            // Format: did:plc:user-id (tenant assignment should be done manually)
+        if (operation === 'create' && data) {
+          if (!data.sender && req.user?.id) { // Auto-set sender if not present
+            data.sender = req.user.id;
+          }
+          // AT Protocol specific logic from original
+          if (!data.atProtocol?.did && req.user) {
             data.atProtocol = {
               ...data.atProtocol,
-              did: `did:plc:${req.user.id}`,
-              type: 'co.kendev.spaces.message',
-            }
+              did: `did:plc:${req.user.id}`, // Assuming req.user.id is appropriate for DID
+              type: 'co.kendev.spaces.message', // Ensure this is the desired type
+            };
           }
         }
-        return data
+        return data;
       },
     ],
     afterChange: [
-      // Generate AT Protocol URI and CID
-      async ({ doc, operation }) => {
-        if (operation === 'create') {
-          // Generate URI and CID based on doc ID
-          const uri = `at://${doc.atProtocol?.did}/co.kendev.spaces.message/${doc.id}`
-          const cid = `bafyrei${doc.id.toString().padStart(32, '0')}` // Simplified CID
+      // TODO: Trigger Leo AI response if needed
+      // TODO: Update conversation state
+      // TODO: Notify relevant users
 
-          // Update the document with generated values
-          // Note: This would be done with a direct database update in production
-          console.log(`Generated AT Protocol URI: ${uri}, CID: ${cid}`)
+      // Retaining AT Protocol hook from original
+      async ({ doc, operation, req }) => { // Added req here
+        if (operation === 'create' && doc) {
+          // Generate URI and CID based on doc ID and other data
+          // Ensure doc.atProtocol.did is populated correctly by beforeChange hook or is already set
+          if (doc.atProtocol?.did && doc.id) {
+            const uri = `at://${doc.atProtocol.did}/co.kendev.spaces.message/${doc.id}`;
+            // Simplified CID, real implementation might involve hashing content
+            const cid = `bafyrei${doc.id.toString().padStart(50, '0')}`; // Example CID
+
+            // This hook runs after the document is created/updated.
+            // To update the document itself with URI and CID, you'd typically use another update operation,
+            // but be careful of triggering infinite loops.
+            // For now, just logging as in the original.
+            // In a real scenario, this might be handled by a separate process or a direct DB update
+            // if Payload's hooks don't easily support self-update post-creation without recursion.
+            console.log(`Generated AT Protocol URI: ${uri}, CID: ${cid} for doc ID ${doc.id}. Consider updating the record.`);
+
+            // Example of how one might try to update (use with caution due to potential loops):
+            // await req.payload.update({
+            //   collection: 'messages',
+            //   id: doc.id,
+            //   data: {
+            //     atProtocol: {
+            //       ...doc.atProtocol,
+            //       uri,
+            //       cid,
+            //     },
+            //   },
+            // });
+          }
         }
       },
     ],
+    // Retaining beforeValidate from original author hook, but adapting for 'sender'
+    // This is now merged into the beforeChange hook above to keep logic together.
   },
-
-  timestamps: true,
-}
+  timestamps: true, // Enables createdAt and updatedAt fields automatically
+  // Existing features like 'versions' could be added if needed.
+};
