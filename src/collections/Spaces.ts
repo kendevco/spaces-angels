@@ -1,6 +1,7 @@
 ﻿// @ts-nocheck
 // @ts-nocheck
 import type { CollectionConfig } from 'payload'
+import type { SpaceData } from '../types/space-data'
 // import { authenticated } from '../access/authenticated' // Unused
 
 export const Spaces: CollectionConfig = {
@@ -1053,6 +1054,48 @@ export const Spaces: CollectionConfig = {
             description: 'Overall engagement score (0-100)',
           },
         },
+      ],
+    },
+    // JSON field for consolidated data
+    {
+      name: 'data',
+      type: 'json',
+      label: 'Space Data',
+      admin: {
+        description: 'Consolidated business data for this space (messages, products, orders, etc.).',
+        // Consider adding a custom component for better visualization or editing if needed.
+        // components: {
+        //   Field: CustomJsonViewComponent, // Example
+        // },
+        readOnly: false, // Should be false to allow programmatic updates by migration scripts
+      },
+      // No specific validation here as the structure is defined by SpaceData interface.
+  // Validation can beবলের by migration scripts or hooks if necessary.
+      //型: 'SpaceData', // This is a comment, not an actual Payload field type option
+      // TODO MIGRATE_TO_JSON: All queries for messages, products, orders, etc., previously targeting separate
+      // collections related to this space must now query this 'data' field.
+      // Example: To get messages for a space, query `Spaces.data.messages`.
+      // Use/develop helpers in `src/utilities/json-query-helpers.ts`.
+      validate: (value: unknown) => {
+        if (value && typeof value !== 'object') {
+          return 'Data must be a valid JSON object or null.';
+        }
+        // More specific validations for SpaceData structure can be added here if needed,
+        // though type safety is primarily handled by TypeScript and migration script logic.
+        return true;
+      },
+    },
+    {
+      name: '_migrationStatus',
+      type: 'group',
+      admin: {
+        condition: () => false, // Hidden from Admin UI
+        description: 'Tracks the status of JSON data migration for this space.',
+      },
+      fields: [
+        { name: 'jsonMigrated', type: 'checkbox', defaultValue: false },
+        { name: 'migratedAt', type: 'date' },
+        { name: 'migrationVersion', type: 'text' },
       ],
     },
   ],

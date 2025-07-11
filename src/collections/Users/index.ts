@@ -1,5 +1,5 @@
 import type { CollectionConfig, Where } from 'payload'
-
+import type { UserPreferences } from '../../types/user-preferences'
 import { authenticated } from '../../access/authenticated'
 
 export const Users: CollectionConfig = {
@@ -444,6 +444,46 @@ export const Users: CollectionConfig = {
         { label: 'Auto', value: 'auto' },
       ],
       defaultValue: 'auto',
+    },
+    // New JSON field for user preferences
+    {
+      name: 'preferences',
+      label: 'User Preferences (JSON)',
+      type: 'json',
+      admin: {
+        description: 'Consolidated user preferences, including activity log, theme, timezone, and privacy settings. Managed programmatically.',
+        readOnly: false, // Allow programmatic updates. Could be true if only scripts should edit.
+        // components: {
+        //  Field: CustomJsonViewComponent, // For better visualization
+        // },
+      },
+      //型: 'UserPreferences', // Comment for type definition
+      // TODO MIGRATE_TO_JSON: Queries for user activity, theme, timezone, or privacy settings
+      // that previously targeted distinct fields (like `theme`, `timezone`, `privacySettings` group)
+      // must now query this 'preferences' field.
+      // Example: To get user theme, query `Users.preferences.theme`.
+      // Activity log data, if populated, will be in `Users.preferences.activityLog`.
+      // Use/develop helpers in `src/utilities/json-query-helpers.ts`.
+      validate: (value: unknown) => {
+        if (value && typeof value !== 'object') {
+          return 'Preferences must be a valid JSON object or null.';
+        }
+        // Further validation for UserPreferences structure could be added here.
+        return true;
+      },
+    },
+    {
+      name: '_migrationStatus',
+      type: 'group',
+      admin: {
+        condition: () => false, // Hidden from Admin UI
+        description: 'Tracks the status of JSON data migration for this user.',
+      },
+      fields: [
+        { name: 'jsonMigrated', type: 'checkbox', defaultValue: false },
+        { name: 'migratedAt', type: 'date' },
+        { name: 'migrationVersion', type: 'text' },
+      ],
     },
   ],
   hooks: {

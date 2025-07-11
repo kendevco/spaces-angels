@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import type { TenantConfiguration } from '../types/tenant-configuration'
 
 export const Tenants: CollectionConfig = {
   slug: 'tenants',
@@ -457,6 +458,50 @@ export const Tenants: CollectionConfig = {
             description: 'Maximum storage in MB',
           },
         },
+      ],
+    },
+    // New JSON field for consolidated tenant configuration
+    {
+      name: 'jsonData', // Field name for the database
+      label: 'JSON Configuration Data', // Label for the Admin UI
+      type: 'json',
+      // The 'type' property for typescript definition would be TenantConfiguration,
+      // but Payload CMS itself just knows this as a 'json' field.
+      // We will ensure type safety in our application code when accessing this field.
+      admin: {
+        description: 'Consolidated configuration data for this tenant (memberships, revenue settings, integrations, business settings, limits, etc.). This field is managed programmatically by migration scripts.',
+        readOnly: false, // Set to true if it should only be editable via scripts post-migration and not via admin UI directly for this raw JSON. For now, false to allow script writing.
+        // Consider a custom component for better visualization in admin UI if direct viewing is needed.
+        // components: {
+        //   Field: CustomJsonViewComponent, // Example
+        // },
+      },
+      // No specific Payload validation here as the structure is defined by the TenantConfiguration interface.
+      // Validation will be handled by migration scripts or application-level logic.
+      // TODO MIGRATE_TO_JSON: Queries for tenant memberships, revenue sharing details, specific integrations,
+      // business settings, and limits that previously targeted separate collections or distinct group fields
+      // must now query this 'jsonData' field.
+      // Example: To get tenant memberships, query `Tenants.jsonData.memberships`.
+      // Use/develop helpers in `src/utilities/json-query-helpers.ts`.
+      validate: (value: unknown) => {
+        if (value && typeof value !== 'object') {
+          return 'JSON Configuration Data must be a valid JSON object or null.';
+        }
+        // Further validation for TenantConfiguration structure could be added here.
+        return true;
+      },
+    },
+    {
+      name: '_migrationStatus',
+      type: 'group',
+      admin: {
+        condition: () => false, // Hidden from Admin UI
+        description: 'Tracks the status of JSON data migration for this tenant.',
+      },
+      fields: [
+        { name: 'jsonMigrated', type: 'checkbox', defaultValue: false },
+        { name: 'migratedAt', type: 'date' },
+        { name: 'migrationVersion', type: 'text' },
       ],
     },
   ],

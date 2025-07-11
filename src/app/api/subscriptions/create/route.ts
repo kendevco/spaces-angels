@@ -145,8 +145,16 @@ export async function POST(request: NextRequest) {
     })
 
     // Store subscription record with enhanced Connect metadata
+    // TODO MIGRATE_TO_JSON: Subscriptions are moving to Spaces.data.subscriptions.
+    // This API endpoint needs to be updated to write to the Space.data.subscriptions array
+    // instead of the 'subscriptions' collection.
+    // This will involve:
+    // 1. Fetching the Space document (already fetched as `space`).
+    // 2. Appending the new subscription to its `data.subscriptions` array.
+    // 3. Updating the Space document.
+    // Ensure atomicity or handle concurrent updates if necessary.
     const subscription = await payload.create({
-      collection: 'subscriptions' as any,
+      collection: 'subscriptions' as any, // This will change
       data: {
         user: userId,
         space: spaceId,
@@ -618,8 +626,21 @@ export async function GET(request: NextRequest) {
     const payload = await getPayload({ config: configPromise })
 
     // Get user's active subscriptions
+    // TODO MIGRATE_TO_JSON: Subscriptions are moving to Spaces.data.subscriptions.
+    // This GET endpoint, if it's meant to fetch these types of subscriptions (rather than spaceMemberships),
+    // will need to be updated.
+    // It would involve:
+    // 1. Querying Spaces where `data.subscriptions` array contains entries for the given `userId`.
+    // 2. This is a complex query for JSON arrays and might require fetching relevant spaces
+    //    and then filtering their `data.subscriptions` arrays in application code, or using advanced DB functions.
+    // The current code fetches `spaceMemberships`, which is different from the `subscriptions`
+    // being created in the POST handler (which are payment/tier subscriptions).
+    // If this GET is for `spaceMemberships`, it's unaffected by `Subscriptions` collection removal.
+    // If this GET is intended to fetch what the POST creates, it needs a major rewrite.
+    // For now, assuming it's about `spaceMemberships` based on collection slug.
     const subscriptions = await payload.find({
-      collection: 'spaceMemberships',
+      collection: 'spaceMemberships', // This seems to be fetching space *memberships*, not *payment subscriptions*.
+                                      // If it were fetching payment subscriptions, this would need to change.
       where: {
         user: {
           equals: userId,

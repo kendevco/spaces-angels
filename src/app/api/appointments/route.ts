@@ -18,8 +18,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the appointment
+    // TODO MIGRATE_TO_JSON: Appointments are moving to Spaces.data.appointments.
+    // This API endpoint needs to be updated to write to the Space.data.appointments array
+    // instead of the 'appointments' collection.
+    // This will involve:
+    // 1. Fetching the Space document.
+    // 2. Appending the new appointment to its `data.appointments` array.
+    // 3. Updating the Space document.
+    // Ensure atomicity or handle concurrent updates if necessary.
     const appointment = await payload.create({
-      collection: 'appointments',
+      collection: 'appointments', // This will change
       data: {
         title: data.title,
         description: data.description,
@@ -130,32 +138,43 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
 
     // Build query
+    // TODO MIGRATE_TO_JSON: Appointments are moving to Spaces.data.appointments.
+    // This API endpoint needs to be updated to query the Space.data.appointments array
+    // for the relevant space(s) the user has access to, or filter by organizer if that's still relevant.
+    // This will involve:
+    // 1. Determining which Space(s) to query.
+    // 2. Fetching those Space documents.
+    // 3. Filtering the `data.appointments` array within each Space based on query parameters (startDate, endDate, status).
+    // 4. Aggregating the results.
+    // Consider using `src/utilities/json-query-helpers.ts`.
     const query: any = {
-      organizer: { equals: user.user.id }
+      organizer: { equals: user.user.id } // This logic will need to change significantly.
     }
 
     if (startDate && endDate) {
-      query.startTime = {
+      query.startTime = { // This won't directly apply to a JSON field query in the same way.
         greater_than_equal: startDate,
         less_than_equal: endDate
       }
     }
 
     if (status) {
-      query.status = { equals: status }
+      query.status = { equals: status } // Also needs re-evaluation for JSON queries.
     }
 
+    // The following find operation will need to be completely rethought.
+    // You'll likely fetch spaces and then filter their `data.appointments` arrays.
     const appointments = await payload.find({
-      collection: 'appointments',
-      where: query,
+      collection: 'appointments', // This will change
+      where: query, // This query structure will change
       limit,
-      sort: 'startTime',
+      sort: 'startTime', // Sorting will need to be done on the filtered array.
     })
 
     return NextResponse.json({
       success: true,
-      appointments: appointments.docs,
-      total: appointments.totalDocs,
+      appointments: appointments.docs, // This will be derived differently
+      total: appointments.totalDocs, // This will be derived differently
     })
 
   } catch (error) {
