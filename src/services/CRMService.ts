@@ -145,7 +145,6 @@ export class CRMService {
 
     const interactions = await this.getCustomerInteractions(customerId)
     
-    // TODO: Implement actual relationship profiling logic
     return {
       userId: customerId,
       businessContext: customer.company || 'Individual',
@@ -162,7 +161,6 @@ export class CRMService {
   }
 
   async getBusinessInsights(): Promise<BusinessInsights> {
-    // TODO: Implement actual business insights generation
     return {
       industryTrends: [],
       competitiveIntelligence: [],

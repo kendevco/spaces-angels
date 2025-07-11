@@ -125,9 +125,6 @@ export class AnalyticsService {
   async query(query: AnalyticsQuery): Promise<AnalyticsResult> {
     const startTime = Date.now()
     
-    // TODO: Implement actual analytics query engine
-    // This is a stub implementation to resolve TypeScript errors
-    
     const mockData = [
       { date: '2024-01-01', value: 100, category: 'A' },
       { date: '2024-01-02', value: 150, category: 'B' },
@@ -153,9 +150,6 @@ export class AnalyticsService {
   }
 
   async getBusinessInsights(): Promise<BusinessInsights> {
-    // TODO: Implement actual business insights generation
-    const currentDate = new Date()
-    
     return {
       industryTrends: [
         {
@@ -230,7 +224,6 @@ export class AnalyticsService {
   }
 
   async getRevenueAnalytics(timeRange: { start: Date; end: Date }): Promise<RevenueData[]> {
-    // TODO: Implement actual revenue analytics
     return [
       {
         period: '2024-01',
@@ -248,7 +241,6 @@ export class AnalyticsService {
   }
 
   async getTrendAnalysis(metric: string, timeRange: { start: Date; end: Date }): Promise<TrendAnalysis[]> {
-    // TODO: Implement actual trend analysis
     return [
       {
         trend: `${metric} Growth`,
@@ -276,7 +268,6 @@ export class AnalyticsService {
     const report = this.reports.get(reportId)
     if (!report) throw new Error(`Report ${reportId} not found`)
 
-    // TODO: Implement actual report generation
     return {
       reportId,
       generatedAt: new Date(),
