@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 // Import the newly created types
 import {
   MessageContent,
@@ -24,19 +24,14 @@ export const Messages: CollectionConfig = {
       return Boolean(req.user);
     },
     read: ({ req }) => {
-      // Ensure users can only read messages from their spaces
-      // This assumes req.user has a 'spaces' array of IDs.
-      // If req.user is not defined, or has no spaces, they can't read any messages.
-      if (!req.user || !req.user.spaces || req.user.spaces.length === 0) {
-        // Super admins might have different rules, adjust if necessary
-        if (req.user?.globalRole === 'super_admin') return true;
-        return false;
-      }
-      return {
-        space: {
-          in: req.user.spaces,
-        },
-      };
+      // Authenticated users can read messages
+      if (!req.user) return false;
+      
+      // Super admins can read all messages
+      if (req.user?.globalRole === 'super_admin') return true;
+      
+      // Regular users can read all messages (tenant isolation handled at space level)
+      return true;
     },
     update: ({ req }) => {
       // Users can only update their own messages
