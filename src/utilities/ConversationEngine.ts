@@ -1,402 +1,130 @@
-// Conversation Engine Utility - Task 004
-// Handles advanced conversational flows, AI context management, and conversation processing
+// Task 004: Conversation Engine
+// Manages the flow and state of conversations, utilizing context and intents
+// to guide interactions and decision-making.
 
-import { 
-  ConversationContext, 
-  ConversationEngineResult, 
-  ConversationAction,
-  ConversationParticipant,
-  AIConversationContext,
-  MessageContent 
-} from '../types/messages'
+import { MessageContent } from '../types/messages';
+import { ConversationContext, DetectedIntent } from '../types/conversation';
+// import { BusinessIntelligenceData } from '../types/business-intelligence'; // If needed for state decisions
 
-export class ConversationEngine {
-  
-  /**
-   * Process a conversation turn and generate appropriate response
-   */
-  async processConversation(
-    messageContent: MessageContent,
-    context: ConversationContext,
-    userId: string
-  ): Promise<ConversationEngineResult> {
-    try {
-      // Analyze the message content
-      const intent = await this.analyzeIntent(messageContent)
-      
-      // Update conversation context
-      const updatedContext = await this.updateContext(context, messageContent, userId)
-      
-      // Generate response based on intent and context
-      const response = await this.generateResponse(intent, updatedContext, messageContent)
-      
-      // Determine follow-up actions
-      const actions = await this.determineActions(intent, updatedContext)
-      
-      // Generate follow-up suggestions
-      const followUp = await this.generateFollowUp(intent, updatedContext)
-      
-      return {
-        response,
-        actions,
-        context: updatedContext,
-        followUp,
-        confidence: intent.confidence
-      }
-    } catch (error) {
-      console.error('ConversationEngine error:', error)
-      return {
-        response: 'I apologize, but I encountered an error processing your message. Please try again.',
-        actions: [],
-        context,
-        followUp: [],
-        confidence: 0
-      }
-    }
-  }
-
-  /**
-   * Analyze message intent and extract key information
-   */
-  private async analyzeIntent(content: MessageContent): Promise<{
-    type: string
-    entities: Record<string, any>
-    confidence: number
-    sentiment: 'positive' | 'negative' | 'neutral'
-  }> {
-    const text = content.text || ''
-    
-    // Simple intent analysis (stub implementation)
-    const intents = {
-      'greeting': ['hello', 'hi', 'hey', 'good morning', 'good afternoon'],
-      'question': ['what', 'how', 'when', 'where', 'why', 'who', '?'],
-      'request': ['can you', 'could you', 'please', 'help me', 'i need'],
-      'complaint': ['problem', 'issue', 'wrong', 'error', 'broken', 'not working'],
-      'compliment': ['great', 'excellent', 'amazing', 'perfect', 'love it', 'thank you'],
-      'goodbye': ['bye', 'goodbye', 'see you', 'talk later', 'have a good']
-    }
-
-    let detectedIntent = 'general'
-    let confidence = 0.5
-    
-    for (const [intent, keywords] of Object.entries(intents)) {
-      const matches = keywords.filter(keyword => 
-        text.toLowerCase().includes(keyword.toLowerCase())
-      )
-      
-      if (matches.length > 0) {
-        const intentConfidence = matches.length / keywords.length
-        if (intentConfidence > confidence) {
-          detectedIntent = intent
-          confidence = intentConfidence
-        }
-      }
-    }
-
-    // Simple sentiment analysis
-    const positiveWords = ['good', 'great', 'excellent', 'love', 'like', 'happy', 'satisfied']
-    const negativeWords = ['bad', 'terrible', 'hate', 'dislike', 'angry', 'frustrated', 'disappointed']
-    
-    const positiveCount = positiveWords.filter(word => text.toLowerCase().includes(word)).length
-    const negativeCount = negativeWords.filter(word => text.toLowerCase().includes(word)).length
-    
-    let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral'
-    if (positiveCount > negativeCount) sentiment = 'positive'
-    else if (negativeCount > positiveCount) sentiment = 'negative'
-
-    return {
-      type: detectedIntent,
-      entities: this.extractEntities(text),
-      confidence,
-      sentiment
-    }
-  }
-
-  /**
-   * Extract entities from text (stub implementation)
-   */
-  private extractEntities(text: string): Record<string, any> {
-    const entities: Record<string, any> = {}
-    
-    // Extract email addresses
-    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g
-    const emails = text.match(emailRegex)
-    if (emails) entities.emails = emails
-    
-    // Extract phone numbers (simple pattern)
-    const phoneRegex = /\b\d{3}-\d{3}-\d{4}\b|\b\(\d{3}\)\s*\d{3}-\d{4}\b/g
-    const phones = text.match(phoneRegex)
-    if (phones) entities.phones = phones
-    
-    // Extract dollar amounts
-    const moneyRegex = /\$\d+(?:,\d{3})*(?:\.\d{2})?/g
-    const amounts = text.match(moneyRegex)
-    if (amounts) entities.amounts = amounts
-    
-    return entities
-  }
-
-  /**
-   * Update conversation context with new message
-   */
-  private async updateContext(
-    context: ConversationContext,
-    content: MessageContent,
-    userId: string
-  ): Promise<ConversationContext> {
-    const updatedContext = { ...context }
-    
-    // Update last activity
-    updatedContext.metadata = {
-      ...updatedContext.metadata,
-      lastActivity: new Date(),
-      messageCount: (updatedContext.metadata?.messageCount || 0) + 1
-    }
-    
-    // Update participant activity
-    const participant = updatedContext.participants.find(p => p.id === userId)
-    if (participant) {
-      participant.lastSeen = new Date()
-    }
-    
-    // Update AI context if present
-    if (updatedContext.aiContext) {
-      updatedContext.aiContext.conversationHistory = [
-        ...(updatedContext.aiContext.conversationHistory || []),
-        {
-          role: 'user',
-          content: content.text || '',
-          timestamp: new Date()
-        }
-      ]
-      
-      // Keep only last 10 messages to avoid token limits
-      if (updatedContext.aiContext.conversationHistory.length > 10) {
-        updatedContext.aiContext.conversationHistory = 
-          updatedContext.aiContext.conversationHistory.slice(-10)
-      }
-    }
-    
-    return updatedContext
-  }
-
-  /**
-   * Generate response based on intent and context
-   */
-  private async generateResponse(
-    intent: any,
-    context: ConversationContext,
-    content: MessageContent
-  ): Promise<string> {
-    const responses = {
-      'greeting': [
-        'Hello! How can I help you today?',
-        'Hi there! What can I do for you?',
-        'Good to see you! How may I assist you?'
-      ],
-      'question': [
-        'That\'s a great question! Let me help you with that.',
-        'I\'d be happy to help answer that for you.',
-        'Let me look into that for you.'
-      ],
-      'request': [
-        'I\'ll be happy to help you with that.',
-        'Of course! Let me assist you with that.',
-        'I can definitely help you with that request.'
-      ],
-      'complaint': [
-        'I understand your concern and I\'m here to help resolve this.',
-        'I apologize for any inconvenience. Let me help fix this issue.',
-        'Thank you for bringing this to my attention. I\'ll help resolve this.'
-      ],
-      'compliment': [
-        'Thank you so much! I really appreciate your kind words.',
-        'That means a lot to me, thank you!',
-        'I\'m so glad I could help! Thank you for the feedback.'
-      ],
-      'goodbye': [
-        'Goodbye! Feel free to reach out if you need anything else.',
-        'Have a great day! I\'m here if you need any help.',
-        'Take care! Don\'t hesitate to contact me if you need assistance.'
-      ],
-      'general': [
-        'I understand. How can I help you with that?',
-        'Thank you for your message. What would you like me to help you with?',
-        'I\'m here to help. What can I do for you?'
-      ]
-    }
-
-    const intentResponses = responses[intent.type as keyof typeof responses] || responses.general
-    const randomResponse = intentResponses[Math.floor(Math.random() * intentResponses.length)]
-    
-    return randomResponse
-  }
-
-  /**
-   * Determine follow-up actions based on intent and context
-   */
-  private async determineActions(
-    intent: any,
-    context: ConversationContext
-  ): Promise<ConversationAction[]> {
-    const actions: ConversationAction[] = []
-    
-    // Add actions based on intent
-    switch (intent.type) {
-      case 'complaint':
-        actions.push({
-          type: 'escalate',
-          parameters: { reason: 'customer_complaint', priority: 'high' },
-          priority: 1,
-          automated: false
-        })
-        break
-        
-      case 'request':
-        if (intent.entities.emails || intent.entities.phones) {
-          actions.push({
-            type: 'create_task',
-            parameters: { type: 'follow_up', entities: intent.entities },
-            priority: 2,
-            automated: true
-          })
-        }
-        break
-        
-      case 'question':
-        actions.push({
-          type: 'update_data',
-          parameters: { type: 'knowledge_gap', question: intent.entities },
-          priority: 3,
-          automated: true
-        })
-        break
-    }
-    
-    // Add context-based actions
-    if (context.priority === 'urgent') {
-      actions.push({
-        type: 'escalate',
-        parameters: { reason: 'urgent_priority' },
-        priority: 1,
-        automated: true
-      })
-    }
-    
-    return actions.sort((a, b) => a.priority - b.priority)
-  }
-
-  /**
-   * Generate follow-up suggestions
-   */
-  private async generateFollowUp(
-    intent: any,
-    context: ConversationContext
-  ): Promise<string[]> {
-    const followUp: string[] = []
-    
-    switch (intent.type) {
-      case 'greeting':
-        followUp.push(
-          'What can I help you with today?',
-          'Are you looking for information about our products?',
-          'Do you have any questions I can answer?'
-        )
-        break
-        
-      case 'question':
-        followUp.push(
-          'Would you like more detailed information about this?',
-          'Do you have any other questions?',
-          'Is there anything else I can clarify?'
-        )
-        break
-        
-      case 'request':
-        followUp.push(
-          'Is there anything else I can help you with?',
-          'Would you like me to provide additional information?',
-          'Do you need help with anything else?'
-        )
-        break
-        
-      case 'complaint':
-        followUp.push(
-          'Is there anything specific I can do to help resolve this?',
-          'Would you like me to escalate this to a supervisor?',
-          'Can you provide more details about the issue?'
-        )
-        break
-    }
-    
-    return followUp
-  }
-
-  /**
-   * Create a new conversation context
-   */
-  async createConversationContext(
-    tenantId: string,
-    participants: ConversationParticipant[],
-    options?: {
-      threadId?: string
-      channelId?: string
-      spaceId?: string
-      topic?: string
-      priority?: 'low' | 'normal' | 'high' | 'urgent'
-    }
-  ): Promise<ConversationContext> {
-    return {
-      tenantId,
-      participants,
-      threadId: options?.threadId,
-      channelId: options?.channelId,
-      spaceId: options?.spaceId,
-      topic: options?.topic,
-      tags: [],
-      priority: options?.priority || 'normal',
-      status: 'active',
-      metadata: {
-        createdAt: new Date(),
-        messageCount: 0
-      }
-    }
-  }
-
-  /**
-   * Add participant to conversation
-   */
-  async addParticipant(
-    context: ConversationContext,
-    participant: ConversationParticipant
-  ): Promise<ConversationContext> {
-    const updatedContext = { ...context }
-    
-    // Check if participant already exists
-    const existingIndex = updatedContext.participants.findIndex(p => p.id === participant.id)
-    
-    if (existingIndex >= 0) {
-      // Update existing participant
-      updatedContext.participants[existingIndex] = participant
-    } else {
-      // Add new participant
-      updatedContext.participants.push(participant)
-    }
-    
-    return updatedContext
-  }
-
-  /**
-   * Remove participant from conversation
-   */
-  async removeParticipant(
-    context: ConversationContext,
-    participantId: string
-  ): Promise<ConversationContext> {
-    const updatedContext = { ...context }
-    updatedContext.participants = updatedContext.participants.filter(p => p.id !== participantId)
-    return updatedContext
-  }
+interface ConversationTurn {
+  turnId: string;
+  userInput?: MessageContent;
+  agentResponse?: MessageContent;
+  timestamp: Date;
+  intentsDetected?: DetectedIntent[];
+  // other relevant data for a turn
 }
 
-export default ConversationEngine 
+export class ConversationEngine {
+  private context: ConversationContext;
+
+  constructor(initialContext?: ConversationContext) {
+    this.context = initialContext || {
+      conversationId: `conv_eng_${Date.now()}`,
+      phase: 'greeting',
+      intentHistory: [],
+      activeBusinessGoals: [],
+      userPreferences: {},
+      sessionMemory: {},
+      // Initialize other fields as necessary
+    };
+    console.log(`[ConversationEngine] Initialized with context for conversation: ${this.context.conversationId}`);
+  }
+
+  /**
+   * Processes an incoming message and updates the conversation state.
+   * @param message The incoming message content.
+   * @returns A response message content (e.g., from Leo AI) or null.
+   */
+  public handleIncomingMessage(message: MessageContent): MessageContent | null {
+    console.log(`[ConversationEngine] Handling incoming message type: ${message.type} for conversation: ${this.context.conversationId}`);
+    // 1. Update context using MessageProcessor (or parts of its logic)
+    //    - This might involve calling MessageProcessor.generateConversationContext or similar logic here.
+    //    - For now, a simplified update:
+    if (message.metadata?.intent) {
+      this.context.intentHistory.push(message.metadata.intent);
+      this.context.currentPrimaryIntent = message.metadata.intent.name;
+    }
+    this.context.lastUserMessageTimestamp = new Date();
+
+    // 2. Determine next action based on current context and message
+    //    (e.g., route to NLU, generate AI response, trigger an action)
+    const nextAction = this.determineNextAction(message);
+
+    // 3. If AI response is needed, generate it (placeholder)
+    if (nextAction === 'generate_ai_response') {
+      const aiResponse = this.generatePlaceholderAiResponse(message);
+      if (aiResponse.metadata?.intent) {
+         this.context.intentHistory.push(aiResponse.metadata.intent);
+      }
+      this.context.lastAgentMessageTimestamp = new Date();
+      return aiResponse;
+    }
+
+    // TODO: Implement more sophisticated conversation flow logic.
+    // This could involve state machines, rule engines, or NLU/NLG services.
+
+    console.log(`[ConversationEngine] Incoming message processed. Current phase: ${this.context.phase}`);
+    return null; // No direct response generated in this basic stub
+  }
+
+  /**
+   * Determines the next action based on the current message and conversation context.
+   * (Placeholder for more complex routing logic)
+   */
+  private determineNextAction(message: MessageContent): string {
+    // Simple logic: if user asks for help, respond. Otherwise, just log.
+    if (message.text?.toLowerCase().includes('help') || message.metadata?.intent?.name === 'request_assistance') {
+      this.context.phase = 'problem_solving';
+      return 'generate_ai_response';
+    }
+    // Could check context.phase, context.currentIntent etc.
+    return 'log_message';
+  }
+
+  /**
+   * Generates a placeholder AI response.
+   */
+  private generatePlaceholderAiResponse(originalMessage: MessageContent): MessageContent {
+    const responseText = `Leo AI: I received your message "${originalMessage.text || 'with non-text content'}". How can I assist you further?`;
+    return {
+      type: 'text',
+      text: responseText,
+      metadata: {
+        conversationId: this.context.conversationId,
+        intent: { // Placeholder intent for the AI response
+            intentId: `intent_${Date.now()}`,
+            name: 'provide_assistance_offer',
+            confidence: 0.9,
+            entities: [],
+            timestamp: new Date(),
+            sourceType: 'agent_suggestion',
+            isPrimary: true,
+        }
+        // other metadata
+      },
+    };
+  }
+
+  /**
+   * Retrieves the current conversation context.
+   */
+  public getCurrentContext(): ConversationContext {
+    return { ...this.context };
+  }
+
+  /**
+   * Updates specific parts of the conversation context.
+   * @param updates Partial ConversationContext object with fields to update.
+   */
+  public updateContext(updates: Partial<ConversationContext>): void {
+    this.context = { ...this.context, ...updates };
+    console.log(`[ConversationEngine] Context updated for conversation: ${this.context.conversationId}`, updates);
+  }
+
+  // TODO: Add methods for:
+  // - Explicit intent handling
+  // - State transitions
+  // - Integration with NLU/NLG services
+  // - Managing conversation history and memory more effectively
+}
