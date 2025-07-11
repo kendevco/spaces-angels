@@ -4,9 +4,9 @@ export const Messages: CollectionConfig = {
   slug: 'messages',
   admin: {
     useAsTitle: 'content',
-    defaultColumns: ['content', 'messageType', 'space', 'author', 'createdAt'],
+    defaultColumns: ['content', 'messageType', 'space', 'author', 'priority', 'createdAt'],
     group: 'Collaboration',
-    description: 'Real-time messaging system with threading, reactions, and rich content support',
+    description: 'Enhanced messaging system with dynamic widgets, BI integration, and rich JSON content',
   },
   access: {
     // Tenant-scoped access control
@@ -139,13 +139,13 @@ export const Messages: CollectionConfig = {
       },
     },
 
-    // Message Content
+    // Enhanced Message Content (Task 004)
     {
       name: 'content',
-      type: 'textarea',
+      type: 'json',
       required: true,
       admin: {
-        description: 'The actual message content',
+        description: 'Rich JSON message content with text, widgets, attachments, and metadata',
       },
     },
     {
@@ -154,17 +154,24 @@ export const Messages: CollectionConfig = {
       required: true,
       options: [
         { label: 'Text', value: 'text' },
-        { label: 'Image', value: 'image' },
-        { label: 'File', value: 'file' },
+        { label: 'Rich Content', value: 'rich' },
+        { label: 'System Message', value: 'system' },
+        { label: 'AI Assistant', value: 'ai' },
+        { label: 'Notification', value: 'notification' },
+        { label: 'Alert', value: 'alert' },
         { label: 'Widget', value: 'widget' },
-        { label: 'System', value: 'system' },
-        { label: 'Announcement', value: 'announcement' },
-        { label: 'AI Agent', value: 'ai_agent' },
-        { label: 'Web Chat', value: 'web_chat' },
-        { label: 'Voice AI', value: 'voice_ai' },
-        { label: 'Customer Inquiry', value: 'customer_inquiry' },
-        { label: 'Live Handoff', value: 'live_handoff' },
-        { label: 'System Alert', value: 'system_alert' },
+        { label: 'Business Intelligence', value: 'business_intelligence' },
+        { label: 'Report', value: 'report' },
+        { label: 'Form', value: 'form' },
+        { label: 'Poll', value: 'poll' },
+        { label: 'Payment', value: 'payment' },
+        { label: 'Booking', value: 'booking' },
+        { label: 'File', value: 'file' },
+        { label: 'Image', value: 'image' },
+        { label: 'Video', value: 'video' },
+        { label: 'Audio', value: 'audio' },
+        { label: 'Document', value: 'document' },
+        { label: 'AT Protocol', value: 'at_protocol' },
       ],
       defaultValue: 'text',
       admin: {
@@ -172,7 +179,136 @@ export const Messages: CollectionConfig = {
       },
     },
 
-    // Widget Content Support
+    // Enhanced Conversation Context (Task 004)
+    {
+      name: 'conversationContext',
+      type: 'json',
+      admin: {
+        description: 'Rich conversation context with participants, AI context, and metadata',
+      },
+    },
+
+    // Business Intelligence Data (Task 004)
+    {
+      name: 'businessIntelligence',
+      type: 'json',
+      admin: {
+        description: 'Business intelligence data including insights, metrics, trends, and recommendations',
+      },
+    },
+
+    // Enhanced Message Properties (Task 004)
+    {
+      name: 'priority',
+      type: 'select',
+      options: [
+        { label: 'Low', value: 'low' },
+        { label: 'Normal', value: 'normal' },
+        { label: 'High', value: 'high' },
+        { label: 'Urgent', value: 'urgent' },
+      ],
+      defaultValue: 'normal',
+      admin: {
+        description: 'Message priority level',
+      },
+    },
+    {
+      name: 'readBy',
+      type: 'array',
+      fields: [
+        {
+          name: 'user',
+          type: 'relationship',
+          relationTo: 'users',
+          required: true,
+        },
+        {
+          name: 'readAt',
+          type: 'date',
+          required: true,
+        },
+        {
+          name: 'acknowledged',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+      ],
+      admin: {
+        description: 'Users who have read this message',
+      },
+    },
+    {
+      name: 'reactions',
+      type: 'array',
+      fields: [
+        {
+          name: 'emoji',
+          type: 'text',
+          required: true,
+          admin: {
+            description: 'Emoji used for reaction',
+          },
+        },
+        {
+          name: 'users',
+          type: 'relationship',
+          relationTo: 'users',
+          hasMany: true,
+          admin: {
+            description: 'Users who reacted with this emoji',
+          },
+        },
+        {
+          name: 'count',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            description: 'Number of reactions',
+            readOnly: true,
+          },
+        },
+      ],
+      admin: {
+        description: 'Emoji reactions to this message',
+      },
+    },
+
+    // Enhanced Threading Support (Task 004)
+    {
+      name: 'threadId',
+      type: 'text',
+      admin: {
+        description: 'Thread identifier for grouping related messages',
+      },
+    },
+    {
+      name: 'replyToId',
+      type: 'relationship',
+      relationTo: 'messages',
+      admin: {
+        description: 'Message this is a reply to',
+      },
+    },
+    {
+      name: 'parentMessage',
+      type: 'relationship',
+      relationTo: 'messages',
+      admin: {
+        description: 'Parent message if this is a reply',
+      },
+    },
+    {
+      name: 'threadReplies',
+      type: 'relationship',
+      relationTo: 'messages',
+      hasMany: true,
+      admin: {
+        description: 'Replies to this message',
+        readOnly: true,
+      },
+    },
+
+    // Widget Content Support (Enhanced)
     {
       name: 'widgetData',
       type: 'group',
@@ -187,13 +323,24 @@ export const Messages: CollectionConfig = {
           type: 'select',
           required: true,
           options: [
+            { label: 'Chart', value: 'chart' },
+            { label: 'Table', value: 'table' },
+            { label: 'Form', value: 'form' },
+            { label: 'Button', value: 'button' },
+            { label: 'Card', value: 'card' },
+            { label: 'Image', value: 'image' },
+            { label: 'Video', value: 'video' },
+            { label: 'Audio', value: 'audio' },
+            { label: 'Calendar', value: 'calendar' },
+            { label: 'Map', value: 'map' },
+            { label: 'Poll', value: 'poll' },
+            { label: 'Quiz', value: 'quiz' },
+            { label: 'Payment', value: 'payment' },
+            { label: 'Booking', value: 'booking' },
             { label: 'Address Verification', value: 'address_verification' },
             { label: 'Web Capture', value: 'web_capture' },
             { label: 'Order Form', value: 'order_form' },
             { label: 'Approval Workflow', value: 'approval_workflow' },
-            { label: 'Poll/Survey', value: 'poll' },
-            { label: 'Calendar Booking', value: 'calendar_booking' },
-            { label: 'Payment Request', value: 'payment_request' },
             { label: 'Document Signature', value: 'document_signature' },
             { label: 'Custom Widget', value: 'custom' },
           ],
@@ -256,26 +403,6 @@ export const Messages: CollectionConfig = {
       ],
     },
 
-    // Threading Support
-    {
-      name: 'parentMessage',
-      type: 'relationship',
-      relationTo: 'messages',
-      admin: {
-        description: 'Parent message if this is a reply',
-      },
-    },
-    {
-      name: 'threadReplies',
-      type: 'relationship',
-      relationTo: 'messages',
-      hasMany: true,
-      admin: {
-        description: 'Replies to this message',
-        readOnly: true,
-      },
-    },
-
     // Rich Content Support
     {
       name: 'attachments',
@@ -295,41 +422,6 @@ export const Messages: CollectionConfig = {
         description: 'Users mentioned in this message',
       },
     },
-    {
-      name: 'reactions',
-      type: 'array',
-      fields: [
-        {
-          name: 'emoji',
-          type: 'text',
-          required: true,
-          admin: {
-            description: 'Emoji used for reaction',
-          },
-        },
-        {
-          name: 'users',
-          type: 'relationship',
-          relationTo: 'users',
-          hasMany: true,
-          admin: {
-            description: 'Users who reacted with this emoji',
-          },
-        },
-        {
-          name: 'count',
-          type: 'number',
-          defaultValue: 0,
-          admin: {
-            description: 'Number of reactions',
-            readOnly: true,
-          },
-        },
-      ],
-      admin: {
-        description: 'Emoji reactions to this message',
-      },
-    },
 
     // Moderation
     {
@@ -347,7 +439,7 @@ export const Messages: CollectionConfig = {
       fields: [
         {
           name: 'content',
-          type: 'textarea',
+          type: 'json',
           required: true,
           admin: {
             description: 'Previous content',
@@ -478,17 +570,6 @@ export const Messages: CollectionConfig = {
           admin: {
             description: 'Source system for this message',
           },
-        },
-        {
-          name: 'priority',
-          type: 'select',
-          options: [
-            { label: 'Low', value: 'low' },
-            { label: 'Normal', value: 'normal' },
-            { label: 'High', value: 'high' },
-            { label: 'Urgent', value: 'urgent' },
-          ],
-          defaultValue: 'normal',
         },
       ],
     },
