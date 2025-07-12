@@ -16,7 +16,10 @@
     "lint:fix": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8192\" next lint --fix",
     "payload": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8192\" payload",
     "reinstall": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8192\" rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
-    "start": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8192\" next start"
+    "start": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8192\" next start",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.55.0",
