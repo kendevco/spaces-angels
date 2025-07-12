@@ -170,6 +170,20 @@ This queue system embodies Angel OS Constitution principles:
 
 ---
 
+## 🎯 **AUTONOMOUS DECISION-MAKING GUIDELINES**
+
+**When you encounter architectural choices:**
+- ✅ **Follow existing patterns** in the codebase (collections, services, API routes)
+- ✅ **Use battle-tested defaults** (Redis + BullMQ is pre-approved)
+- ✅ **Make sensible assumptions** based on current implementation
+- ✅ **Document your decisions** in code comments
+- ✅ **Build comprehensive tests** to validate your approach
+
+**Only escalate when:**
+- 🚨 **Breaking changes** are unavoidable
+- 🚨 **Security concerns** require approval
+- 🚨 **Performance targets** cannot be met with current architecture
+
 ## 🎯 **IMMEDIATE NEXT STEPS**
 
 1. **Review Full Specification:** Read `004-queue-system-implementation.md` thoroughly
@@ -177,15 +191,16 @@ This queue system embodies Angel OS Constitution principles:
 3. **Start with Phase 1:** Foundation infrastructure first
 4. **Test Early:** Build monitoring from day one
 5. **Maintain Quality:** Follow existing code patterns and TypeScript standards
+6. **Commit when ready:** Push code when all tests pass and functionality is complete
 
 ---
 
-## 💬 **COMMUNICATION**
+## 💬 **AUTONOMOUS DEVELOPMENT APPROACH**
 
-- **Questions:** Ask early and often about architectural decisions
-- **Progress Updates:** Daily check-ins on implementation progress  
-- **Blockers:** Escalate immediately if you hit technical roadblocks
-- **Testing:** Demonstrate functionality as you build each phase
+- **Architectural Decisions:** Use existing patterns and make sensible defaults
+- **Progress Updates:** Check in only when tests pass and functionality is complete
+- **Blockers:** Research solutions independently, escalate only after thorough investigation
+- **Testing:** Build comprehensive tests, commit when all pass
 
 ---
 
