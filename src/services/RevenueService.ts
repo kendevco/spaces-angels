@@ -208,6 +208,12 @@ export class RevenueService {
       // Create commission payment records
       await this.createCommissionPayments(tenant, calculation)
 
+      // New: Allocate to prison ministry
+      const { PrisonMinistryService } = await import('./PrisonMinistryService')
+      const ministry = new PrisonMinistryService()
+      await ministry.initialize()
+      await ministry.processReentrySupport(tenantId, 10) // 10% to ministry
+
       console.log(`[RevenueService] Processed revenue for tenant ${tenantId}: $${calculation.monthlyRevenue} revenue, ${calculation.effectiveRate}% rate`)
 
       return calculation
