@@ -22,6 +22,7 @@ import { Venues } from './collections/Venues'
 import { BusinessAgents } from './collections/BusinessAgents'
 import { HumanitarianAgents } from './collections/HumanitarianAgents'
 import { AIGenerationQueue } from './collections/AIGenerationQueue'
+import { JobQueue } from './collections/JobQueue'
 import { TenantMemberships } from './collections/TenantMemberships'
 import { SpaceMemberships } from './collections/SpaceMemberships'
 import { Appointments } from './collections/Appointments'
@@ -126,6 +127,7 @@ export default buildConfig({
     BusinessAgents, 
     HumanitarianAgents, 
     AIGenerationQueue,
+    JobQueue,
     Channels,
     Phyles,
     AgentReputation,
