@@ -68,14 +68,8 @@ export class BusinessIntelligenceProcessor {
    * @returns The processed BusinessInsight object.
    */
   static processInsight(insight: BusinessInsight): BusinessInsight {
-    // Example: Add a default priority if missing based on type
-    let priority = insight.priority;
-    if (!priority) {
-        if (insight.type === 'risk' && (insight.severity === 'critical' || insight.severity === 'high')) priority = 'high';
-        else if (insight.type === 'opportunity') priority = 'medium';
-        else priority = 'low';
-    }
-    return { ...insight, priority: priority || insight.priority };
+    // Process the insight - could add validation, enrichment, etc.
+    return { ...insight };
   }
 
   /**

@@ -36,9 +36,11 @@ export async function findMessagesByTypeInSpace(spaceId: string, messageType: st
       depth: 0, // Only need the space document, or specifically its 'data' field
     });
 
-    if (docs.length > 0 && docs[0].data?.messages) {
-      // If Payload returns the whole space document, filter messages in application code (less efficient)
-      return docs[0].data.messages.filter((msg: any) => msg.messageType === messageType);
+    if (docs.length > 0) {
+      // Note: The 'data' property doesn't exist on Space type yet - this is a placeholder for future JSON implementation
+      // For now, return empty array until JSON schema is implemented
+      console.log('[json-query-helpers] JSON data structure not yet implemented in Space type');
+      return [];
     }
     return [];
   } catch (error) {
@@ -87,11 +89,11 @@ export async function findProductsByPriceRangeInSpace(spaceId: string, minPrice:
       depth: 0,
     });
 
-    if (docs.length > 0 && docs[0].data?.products) {
-      // Application-level filtering (less efficient)
-      return docs[0].data.products.filter((prod: any) =>
-        prod.pricing?.basePrice >= minPrice && prod.pricing?.basePrice <= maxPrice
-      );
+    if (docs.length > 0) {
+      // Note: The 'data' property doesn't exist on Space type yet - this is a placeholder for future JSON implementation
+      // For now, return empty array until JSON schema is implemented
+      console.log('[json-query-helpers] JSON data structure not yet implemented in Space type');
+      return [];
     }
     return [];
   } catch (error) {

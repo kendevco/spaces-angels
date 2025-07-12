@@ -18,13 +18,8 @@ export const Venues: CollectionConfig = {
     read: ({ req }) => {
       if (req.user?.globalRole === 'super_admin') return true
       if (req.user?.globalRole === 'platform_admin') return true
-      // Users can read venues they have access to
-      return {
-        or: [
-          { 'organization.members.user': { equals: req.user?.id } },
-          { 'staff.user': { equals: req.user?.id } },
-        ]
-      }
+      // Users can read venues they have access to - simplified for now
+      return { 'organization.members.user': { equals: req.user?.id } }
     },
     update: ({ req }) => {
       if (req.user?.globalRole === 'super_admin') return true

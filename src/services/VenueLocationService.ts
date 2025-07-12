@@ -294,10 +294,10 @@ export class VenueLocationService {
             venue.organization.id === organizationId :
             venue.organization === organizationId
         )
-        return filtered.length > 0 ? filtered[0] : null
+        return filtered.length > 0 ? filtered[0]! : null
       }
 
-      return venues.length > 0 ? venues[0] : null
+      return venues.length > 0 ? venues[0]! : null
 
     } catch (error) {
       console.error('[VenueLocationService] Error finding closest venue:', error)

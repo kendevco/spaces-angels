@@ -11,23 +11,24 @@ interface CloneWizardModalProps {
 }
 
 const initialCustomizations: SpaceCustomization = {
-  branding: {},
-  features: {},
-  integrations: {},
-  aiPersonality: { name: 'Leo Default', tone: 'friendly' },
+  branding: { primaryColor: '#1e40af', secondaryColor: '#ffffff' },
+  features: { ecommerce: false, booking: false, crm: false, analytics: false },
+  integrations: { stripe: false, mailchimp: false, analytics: false },
+  aiPersonality: { tone: 'friendly', expertise: [], responseStyle: 'helpful' },
 };
 
 const initialDeploymentConfig: DeploymentConfig = {
   environment: 'development',
   region: 'us-east-1',
-  scaling: { minInstances: 1, maxInstances: 2 },
-  monitoring: { alertsEnabled: true, logRetentionDays: 30 },
+  scaling: { minInstances: 1, maxInstances: 2, autoScale: true },
+  monitoring: { alerts: true, logging: true, metrics: true },
 };
 
 const initialBusinessProfile: BusinessProfile = {
-  businessName: '',
-  businessType: '',
-  contactEmail: '',
+  industry: 'technology',
+  size: 'small',
+  targetMarket: 'local',
+  goals: [],
 };
 
 const CloneWizardModal: React.FC<CloneWizardModalProps> = ({
@@ -102,23 +103,23 @@ const CloneWizardModal: React.FC<CloneWizardModalProps> = ({
                 />
               </div>
                <div>
-                <label htmlFor="businessName">Business Name:</label>
+                <label htmlFor="industry">Industry:</label>
                 <input
-                  id="businessName"
+                  id="industry"
                   type="text"
-                  value={businessProfile.businessName}
-                  onChange={(e) => setBusinessProfile({...businessProfile, businessName: e.target.value})}
+                  value={businessProfile.industry}
+                  onChange={(e) => setBusinessProfile({...businessProfile, industry: e.target.value})}
                   required
                   className={styles.formInput}
                 />
               </div>
               <div>
-                <label htmlFor="businessType">Business Type:</label>
+                <label htmlFor="targetMarket">Target Market:</label>
                 <input
-                  id="businessType"
+                  id="targetMarket"
                   type="text"
-                  value={businessProfile.businessType}
-                  onChange={(e) => setBusinessProfile({...businessProfile, businessType: e.target.value})}
+                  value={businessProfile.targetMarket}
+                  onChange={(e) => setBusinessProfile({...businessProfile, targetMarket: e.target.value})}
                   required
                   className={styles.formInput}
                 />
@@ -189,7 +190,7 @@ const CloneWizardModal: React.FC<CloneWizardModalProps> = ({
             <fieldset>
               <legend>Review &amp; Deploy</legend>
               <p><strong>New Space Name:</strong> {targetName}</p>
-              <p><strong>Business Name:</strong> {businessProfile.businessName}</p>
+              <p><strong>Industry:</strong> {businessProfile.industry}</p>
               <p><strong>Environment:</strong> {deploymentConfig.environment}</p>
               <p>Review all settings before deploying.</p>
               <button type="submit" className={styles.primaryButton}>Deploy Cloned Space</button>

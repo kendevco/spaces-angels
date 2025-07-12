@@ -1,6 +1,6 @@
 // src/components/AndrewMartinControlPanel/MetricsDashboard.tsx
 import React from 'react';
-import type { BusinessMetricsWidget, RevenueAnalyticsChart, NetworkStatusWidget as GuardianAngelNetworkWidgetData } from '@/types/andrew-martin'; // Renamed to avoid conflict
+import type { BusinessMetricsWidget, RevenueAnalyticsWidget, NetworkStatusWidget as GuardianAngelNetworkWidgetData } from '@/types/andrew-martin'; // Renamed to avoid conflict
 import RevenueAnalyticsChartComponent from './widgets/RevenueAnalyticsChart'; // Renamed to avoid conflict
 import NetworkStatusWidgetComponent from './widgets/NetworkStatusWidget'; // Renamed to avoid conflict
 import BusinessMetricsWidgetComponent from './widgets/BusinessMetricsWidget'; // Renamed to avoid conflict
@@ -8,7 +8,7 @@ import styles from './styles.module.css';
 
 interface MetricsDashboardProps {
   businessMetricsWidget: BusinessMetricsWidget;
-  revenueAnalyticsChart: RevenueAnalyticsChart;
+  revenueAnalyticsChart: RevenueAnalyticsWidget;
   guardianAngelNetworkWidget: GuardianAngelNetworkWidgetData;
   // Add SpaceOverview once its data structure is clearer for the dashboard context
 }
@@ -24,7 +24,17 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
         <BusinessMetricsWidgetComponent {...businessMetricsWidget.data} />
       </div>
       <div className={`${styles.widgetCard} ${styles.revenueAnalyticsWidget}`}>
-        <RevenueAnalyticsChartComponent {...revenueAnalyticsChart.data} />
+        <RevenueAnalyticsChartComponent 
+          timeframe={revenueAnalyticsChart.data.timeframe}
+          breakdown={revenueAnalyticsChart.data.breakdown}
+          data={revenueAnalyticsChart.data.spaces.map(space => ({
+            date: 'current',
+            revenue: space.revenue.reduce((a, b) => a + b, 0),
+            orders: 1,
+            averageOrderValue: space.revenue.reduce((a, b) => a + b, 0)
+          }))}
+          comparison="previous_period"
+        />
       </div>
       <div className={`${styles.widgetCard} ${styles.guardianAngelWidget}`}>
         <NetworkStatusWidgetComponent {...guardianAngelNetworkWidget.data} />

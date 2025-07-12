@@ -294,7 +294,7 @@ export class PhyleEconomyService {
       }
     })
 
-    return reputations.docs.map(rep => ({
+    return reputations.docs.map((rep: any) => ({
       phyleId: rep.phyleId,
       score: rep.score,
       rank: this.getReputationRank(rep.score)
@@ -327,7 +327,7 @@ export class PhyleEconomyService {
       }
     })
 
-    const totalPhyleEarnings = channels.docs.reduce((sum, channel) => {
+    const totalPhyleEarnings = channels.docs.reduce((sum: number, channel: any) => {
       return sum + (channel.phyleEconomics?.economicStats?.totalEarned || 0)
     }, 0)
 
@@ -349,7 +349,7 @@ export class PhyleEconomyService {
   // Distribution methods
   private distributeEqually(channels: any[], amount: number) {
     const perChannel = amount / channels.length
-    return channels.map(channel => ({
+    return channels.map((channel: any) => ({
       channelId: channel.id,
       amount: perChannel,
       reason: 'Equal distribution'
@@ -357,8 +357,8 @@ export class PhyleEconomyService {
   }
 
   private distributeMeritBased(channels: any[], amount: number) {
-    const totalAccuracy = channels.reduce((sum, ch) => sum + (ch.phyleEconomics?.economicStats?.accuracyScore || 0), 0)
-    return channels.map(channel => ({
+    const totalAccuracy = channels.reduce((sum: number, ch: any) => sum + (ch.phyleEconomics?.economicStats?.accuracyScore || 0), 0)
+    return channels.map((channel: any) => ({
       channelId: channel.id,
       amount: amount * ((channel.phyleEconomics?.economicStats?.accuracyScore || 0) / totalAccuracy),
       reason: 'Merit-based distribution'
@@ -371,8 +371,8 @@ export class PhyleEconomyService {
   }
 
   private distributeContributionWeighted(channels: any[], amount: number) {
-    const totalItems = channels.reduce((sum, ch) => sum + (ch.phyleEconomics?.economicStats?.itemsProcessed || 0), 0)
-    return channels.map(channel => ({
+    const totalItems = channels.reduce((sum: number, ch: any) => sum + (ch.phyleEconomics?.economicStats?.itemsProcessed || 0), 0)
+    return channels.map((channel: any) => ({
       channelId: channel.id,
       amount: amount * ((channel.phyleEconomics?.economicStats?.itemsProcessed || 0) / totalItems),
       reason: 'Contribution-weighted distribution'
@@ -393,9 +393,9 @@ export class PhyleEconomyService {
       }
     })
 
-    const totalEarnings = channels.docs.reduce((sum, ch) => sum + (ch.phyleEconomics?.economicStats?.totalEarned || 0), 0)
-    const totalItems = channels.docs.reduce((sum, ch) => sum + (ch.phyleEconomics?.economicStats?.itemsProcessed || 0), 0)
-    const avgAccuracy = channels.docs.reduce((sum, ch) => sum + (ch.phyleEconomics?.economicStats?.accuracyScore || 0), 0) / channels.docs.length
+    const totalEarnings = channels.docs.reduce((sum: number, ch: any) => sum + (ch.phyleEconomics?.economicStats?.totalEarned || 0), 0)
+    const totalItems = channels.docs.reduce((sum: number, ch: any) => sum + (ch.phyleEconomics?.economicStats?.itemsProcessed || 0), 0)
+    const avgAccuracy = channels.docs.reduce((sum: number, ch: any) => sum + (ch.phyleEconomics?.economicStats?.accuracyScore || 0), 0) / channels.docs.length
 
     return {
       phyle: phyle.name,
@@ -407,9 +407,9 @@ export class PhyleEconomyService {
       itemsPerMember: totalItems / channels.docs.length,
       economicModel: phyle.economicStructure,
       topPerformers: channels.docs
-        .sort((a, b) => (b.phyleEconomics?.economicStats?.totalEarned || 0) - (a.phyleEconomics?.economicStats?.totalEarned || 0))
+        .sort((a: any, b: any) => (b.phyleEconomics?.economicStats?.totalEarned || 0) - (a.phyleEconomics?.economicStats?.totalEarned || 0))
         .slice(0, 5)
-        .map(ch => ({
+        .map((ch: any) => ({
           name: ch.name,
           earnings: ch.phyleEconomics?.economicStats?.totalEarned || 0,
           accuracy: ch.phyleEconomics?.economicStats?.accuracyScore || 0,

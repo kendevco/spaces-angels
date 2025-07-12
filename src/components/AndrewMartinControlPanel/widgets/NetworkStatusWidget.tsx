@@ -1,11 +1,11 @@
 // src/components/AndrewMartinControlPanel/widgets/NetworkStatusWidget.tsx
 import React from 'react';
-import type { NetworkStatusProps, SuccessStory } from '@/types/andrew-martin';
+import type { NetworkStatusProps, SuccessStory, NetworkHealthMetrics } from '@/types/andrew-martin';
 import styles from '../styles.module.css';
 
 const NetworkStatusWidget: React.FC<NetworkStatusProps> = ({
   activeAngels,
-  totalRevenueGenerated,
+  totalRevenue,
   successStories,
   networkHealth,
 }) => {
@@ -16,6 +16,14 @@ const NetworkStatusWidget: React.FC<NetworkStatusProps> = ({
     return 'var(--andrew-secondary)';
   };
 
+  const getHealthStatus = (metrics: NetworkHealthMetrics): 'healthy' | 'degraded' | 'critical' => {
+    if (metrics.uptime > 99 && metrics.errorRate < 1) return 'healthy';
+    if (metrics.uptime > 95 && metrics.errorRate < 5) return 'degraded';
+    return 'critical';
+  };
+
+  const healthStatus = getHealthStatus(networkHealth);
+
   return (
     <div className={styles.widgetContent}>
       <h3 className={styles.widgetTitle}>Guardian Angel Network</h3>
@@ -25,19 +33,19 @@ const NetworkStatusWidget: React.FC<NetworkStatusProps> = ({
           <span className={styles.statLabel}>Active Angels</span>
         </div>
         <div className={styles.statItem}>
-          <span className={styles.statValue}>${totalRevenueGenerated.toLocaleString()}</span>
+          <span className={styles.statValue}>${totalRevenue.toLocaleString()}</span>
           <span className={styles.statLabel}>Total Revenue Generated</span>
         </div>
       </div>
 
       <div className={styles.networkHealthSection}>
         <h4>Network Health:
-          <span style={{ color: getHealthColor(networkHealth.overallStatus), marginLeft: '8px', textTransform: 'capitalize' }}>
-            {networkHealth.overallStatus}
+          <span style={{ color: getHealthColor(healthStatus), marginLeft: '8px', textTransform: 'capitalize' }}>
+            {healthStatus}
           </span>
         </h4>
-        <p>Uptime: {networkHealth.uptimePercentage}%</p>
-        <p>Avg. Response Time: {networkHealth.averageResponseTime}ms</p>
+        <p>Uptime: {networkHealth.uptime}%</p>
+        <p>Avg. Response Time: {networkHealth.responseTime}ms</p>
       </div>
 
       {successStories.length > 0 && (

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { BusinessAgent, BusinessAgentFactory } from '@/services/BusinessAgent'
+import { VAPISecurityService } from '@/services/VAPISecurityService'
 
 /**
  * Enhance VAPI responses with real-time business intelligence
@@ -163,16 +164,34 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleCallStart(payload: any, call: any) {
-  console.log('[VAPI] Enhanced bi-directional call started:', call.id)
+  console.log('[VAPI] 🔐 SECURE Enhanced bi-directional call started:', call.id)
 
-  // Route by phone number to find correct BusinessAgent
-  const phoneNumber = call.phoneNumber?.number
-  let tenantId = call.metadata?.tenantId || '1'
-  let spaceId = call.metadata?.spaceId || 1
-  let businessAgent = null
+  // 🔐 SECURITY FIRST: Create secure context for this call
+  const phoneNumber = call.phoneNumber?.number || call.customer?.number
+  
+  if (!phoneNumber) {
+    console.error('[VAPI] No phone number provided - security risk')
+    return NextResponse.json({ error: 'Phone number required for security' }, { status: 400 })
+  }
 
-  if (phoneNumber) {
-    // Find BusinessAgent by phone number
+  let securityContext, tenantId, spaceId, businessAgent
+  
+  try {
+    // Create secure context with authentication and authorization
+    securityContext = await VAPISecurityService.createSecureContext(
+      call.id,
+      phoneNumber,
+      call.metadata || {}
+    )
+    
+    console.log(`[VAPI] 🛡️ Secure context created: ${securityContext.securityLevel} access for ${phoneNumber}`)
+    
+    // Use security context for all subsequent operations
+    tenantId = securityContext.tenantId
+    spaceId = tenantId // Use tenant as space for now
+    
+    // Find BusinessAgent with security context
+    businessAgent = null
     const agents = await payload.find({
       collection: 'business-agents',
       where: {
@@ -183,10 +202,14 @@ async function handleCallStart(payload: any, call: any) {
 
     if (agents.docs.length > 0) {
       businessAgent = agents.docs[0]
-      tenantId = businessAgent.tenant.id || businessAgent.tenant
-      spaceId = tenantId // Use tenant as space for now
       console.log(`[VAPI] Call routed to BusinessAgent: ${businessAgent.name}`)
     }
+  } catch (securityError) {
+    console.error('[VAPI] Security context creation failed:', securityError)
+    return NextResponse.json({ 
+      error: 'Security verification failed',
+      message: 'This phone number is not authorized for this service'
+    }, { status: 403 })
   }
 
   // Get tenant for business context
@@ -358,33 +381,42 @@ async function handleTranscript(payload: any, { call, message }: any) {
 }
 
 async function handleToolCalls(payload: any, { call, toolCalls }: any) {
-  const spaceId = call.metadata?.spaceId || 1
+  console.log('[VAPI] 🔐 SECURE Tool execution requested:', toolCalls.length, 'tools')
 
   for (const toolCall of toolCalls) {
     let toolResult = null
 
-    switch (toolCall.function?.name) {
-      case 'book_appointment':
-        toolResult = await handleBookAppointment(payload, toolCall.function.arguments, spaceId)
-        break
-
-      case 'get_order_status':
-        toolResult = await handleGetOrderStatus(payload, toolCall.function.arguments)
-        break
-
-      case 'create_crm_contact':
-        toolResult = await handleCreateCRMContact(payload, toolCall.function.arguments, spaceId)
-        break
-
-      default:
-        console.log('Unknown tool call:', toolCall.function?.name)
-        toolResult = { error: 'Unknown tool' }
+    try {
+      // 🔐 SECURE TOOL EXECUTION with authorization
+      const secureExecution = await VAPISecurityService.executeSecureTool(
+        toolCall.function?.name,
+        toolCall.function?.arguments,
+        call.id
+      )
+      
+      if (secureExecution.authorized) {
+        toolResult = secureExecution.result
+        console.log(`[VAPI] ✅ Tool executed successfully: ${toolCall.function?.name}`)
+      } else {
+        toolResult = { 
+          error: 'Unauthorized tool execution',
+          message: 'You do not have permission to execute this tool'
+        }
+        console.log(`[VAPI] ❌ Tool execution denied: ${toolCall.function?.name}`)
+      }
+    } catch (error) {
+      console.error(`[VAPI] Tool execution error: ${toolCall.function?.name}`, error)
+      toolResult = { error: 'Tool execution failed' }
     }
 
+    // Get security context for logging
+    const securityContext = VAPISecurityService.getSecurityContext(call.id)
+    const spaceId = securityContext?.tenantId || 1
+    
     await payload.create({
       collection: 'messages',
       data: {
-        content: `Tool executed: ${toolCall.function?.name} - ${JSON.stringify(toolResult)}`,
+        content: `🔐 SECURE Tool executed: ${toolCall.function?.name} - ${JSON.stringify(toolResult)}`,
         messageType: 'system_alert',
         space: spaceId,
         author: 1,
@@ -393,15 +425,17 @@ async function handleToolCalls(payload: any, { call, toolCalls }: any) {
           department: 'support',
           workflow: toolCall.function?.name?.includes('appointment') ? 'quote' : 'support',
           priority: 'normal',
-          integrationSource: 'vapi_call',
+          integrationSource: 'vapi_secure_call',
         },
         metadata: {
           vapi: {
             callId: call.id,
+            securityLevel: securityContext?.securityLevel || 'unknown',
             toolCalls: [{
               tool: toolCall.function?.name,
               parameters: toolCall.function?.arguments,
               result: toolResult,
+              authorized: toolResult?.error ? false : true
             }],
           }
         },

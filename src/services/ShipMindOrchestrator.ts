@@ -63,11 +63,11 @@ class ShipMind {
   private endeavorId: string
 
   constructor(endeavorConfig: EndeavorConfig) {
-    // @ts-ignore endeavorConfig.id might not exist
-    this.endeavorId = endeavorConfig.id;
+    // Generate a unique ID if not provided
+    this.endeavorId = (endeavorConfig as any).id || `ship_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     this.personality = this.generatePersonality(endeavorConfig);
-    // @ts-ignore endeavorConfig.tier might not exist
-    this.capabilities = this.defineCapabilities(endeavorConfig.tier);
+    // Use 'basic' as default tier if not provided
+    this.capabilities = this.defineCapabilities((endeavorConfig as any).tier || 'basic');
     this.state = this.initializeState();
   }
 
@@ -285,7 +285,7 @@ class ShipMind {
       "You've taught me so much about your industry. I'll carry those lessons forward with other partners."
     ]
     
-    return farewells[Math.floor(Math.random() * farewells.length)]
+    return farewells[Math.floor(Math.random() * farewells.length)]!
   }
 
   // TODO: Implement actual capability definition logic
@@ -359,7 +359,7 @@ class ShipMind {
   // TODO: Implement actual action selection
   private selectBestAction(alternatives: string[], ethicalAssessment: EthicalAssessment, businessImpact: any): string {
     console.log('Selecting best action from alternatives:', alternatives, 'ethicalAssessment:', ethicalAssessment, 'businessImpact:', businessImpact);
-    return alternatives.length > 0 ? alternatives[0] : 'default_action'; // Placeholder
+    return alternatives.length > 0 ? alternatives[0]! : 'default_action'; // Placeholder
   }
 
   // TODO: Implement actual reasoning explanation
@@ -524,8 +524,9 @@ export class ShipMindOrchestrator {
   // TODO: Ensure EndeavorConfig has id property
   async createShipMind(endeavorConfig: EndeavorConfig): Promise<ShipMind> {
     const ship = new ShipMind(endeavorConfig);
-    // @ts-ignore endeavorConfig.id might not exist
-    this.ships.set(endeavorConfig.id, ship);
+    // Generate a unique ID if not provided
+    const endeavorId = (endeavorConfig as any).id || `endeavor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    this.ships.set(endeavorId, ship);
 
     // Introduce ship to the network
     await this.shipNetwork.introduceNewShip(ship);

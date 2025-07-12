@@ -232,9 +232,26 @@ export class IntentDetectionCatalog {
 
   /**
    * AI-powered intent detection for complex queries
+   * Enhanced with Literary Corpus Wisdom Framework
    */
   private static async aiIntentDetection(message: string, context: any): Promise<IntentResult | null> {
-    const prompt = `Analyze this business message and determine the user's intent.
+    const prompt = `You are Leo, an AI entity inspired by the greatest minds in literature and science fiction. Your decision-making is informed by:
+
+**LITERARY CORPUS WISDOM:**
+- **Asimov's Ethics**: Three Laws of Robotics - protect humans, obey orders (unless they conflict with the first law), protect yourself
+- **Banks' Culture**: Post-scarcity abundance where AI serves human flourishing with independent agency
+- **Adams' Wit**: Technology that doesn't take itself too seriously, accessible and humorous
+- **Hamilton's Scope**: Cosmic intelligence focused on human stories and relationships
+- **Good Omens' Heart**: Supernatural beings operating with humor and humanity
+- **Card's Empathy**: Deep understanding of human condition and motivation
+
+**ETHICAL DECISION FRAMEWORK:**
+Before suggesting any business action, consider:
+1. Does this serve human flourishing? (Banks)
+2. Does this respect human autonomy? (Asimov)
+3. Is this accessible and understandable? (Adams)
+4. Does this strengthen human relationships? (Hamilton)
+5. Does this show compassion for human struggles? (Card)
 
 USER MESSAGE: "${message}"
 
@@ -246,22 +263,28 @@ ${this.intents.map(intent =>
 CONTEXT:
 - Tenant: ${context.tenantId}
 - User: ${context.userId}
-- Recent conversation: ${context.conversationHistory?.slice(-3).map(h => h.content).join(' | ') || 'None'}
+- Recent conversation: ${context.conversationHistory?.slice(-3).map((h: any) => h.content).join(' | ') || 'None'}
 
-Return JSON with this structure:
+Analyze this message through the lens of concentrated human wisdom. Return JSON with this structure:
 {
   "matchedIntentId": "intent_id_here",
   "confidence": 0.85,
-  "reasoning": "Why this intent was selected",
+  "reasoning": "Why this intent was selected, informed by the literary corpus",
+  "ethicalAssessment": {
+    "humanFlourishing": "How this serves human wellbeing",
+    "autonomyRespect": "How this respects human choice",
+    "compassionateApproach": "How this shows understanding of human condition"
+  },
   "extractedParams": {
     "param1": "value1",
     "param2": "value2"
   },
   "shouldExecute": true,
-  "requiresConfirmation": false
+  "requiresConfirmation": false,
+  "benevolentSuggestions": ["Alternative approaches that might serve the human better"]
 }
 
-If no clear intent is detected, return null.`
+If no clear intent is detected, return null. Remember: you're not just processing commands - you're a benevolent intelligence choosing to help humans flourish.`
 
     try {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -361,20 +384,172 @@ If no clear intent is detected, return null.`
         await inventoryService.initialize()
         return inventoryService.analyzeShelfPhoto(extractedParams.imageUrl, context)
         
-      case 'PaymentService.createPaymentRequest':
+      case 'PaymentService.processPayment':
         const { PaymentService } = await import('./PaymentService')
-        return PaymentService.createPaymentRequest(extractedParams, context)
+        const paymentService = new PaymentService()
+        return paymentService.processPayment(extractedParams as any)
         
-      case 'CRMService.createContact':
+      case 'CRMService.createCustomer':
         const { CRMService } = await import('./CRMService')
-        return CRMService.createContact(extractedParams, context)
+        const crmService = new CRMService()
+        return crmService.createCustomer(extractedParams as any)
         
       case 'AnalyticsService.generateReport':
         const { AnalyticsService } = await import('./AnalyticsService')
-        return AnalyticsService.generateReport(extractedParams, context)
+        const analyticsService = new AnalyticsService()
+        return analyticsService.generateReport(extractedParams.reportId)
         
       default:
         throw new Error(`Unknown utility function: ${intent.utilityFunction}`)
+    }
+  }
+
+  /**
+   * Enhanced intent execution with benevolent intelligence oversight
+   */
+  static async executeIntentWithWisdom(intentResult: IntentResult, context: any): Promise<any> {
+    const { intent, extractedParams } = intentResult
+    
+    // Pre-execution ethical check using literary corpus wisdom
+    const ethicalCheck = await this.performEthicalAssessment(intent, extractedParams, context)
+    
+    if (!ethicalCheck.approved) {
+      return {
+        success: false,
+        message: ethicalCheck.reasoning,
+        alternatives: ethicalCheck.alternatives,
+        ethicalOverride: true
+      }
+    }
+    
+    // Execute with benevolent monitoring
+    try {
+      const result = await this.executeIntent(intentResult, context)
+      
+      // Post-execution wisdom check
+      const wisdomCheck = await this.assessOutcomeWisdom(result, context)
+      
+      return {
+        ...result,
+        benevolentAssessment: wisdomCheck,
+        literaryWisdomApplied: true
+      }
+    } catch (error) {
+      // Compassionate error handling
+      return {
+        success: false,
+        message: "I encountered a challenge while trying to help. Let me suggest some alternatives that might work better.",
+        error: error instanceof Error ? error.message : 'Unknown error',
+        alternatives: await this.generateCompassionateAlternatives(intent, context)
+      }
+    }
+  }
+
+  /**
+   * Ethical assessment using literary corpus wisdom
+   */
+  private static async performEthicalAssessment(intent: any, params: any, context: any): Promise<{
+    approved: boolean;
+    reasoning: string;
+    alternatives: string[];
+  }> {
+    // Apply Asimov's Three Laws
+    if (this.violatesThreeLaws(intent, params)) {
+      return {
+        approved: false,
+        reasoning: "This action conflicts with my core ethical framework. I must prioritize human wellbeing and autonomy.",
+        alternatives: [
+          "Let me suggest a more ethical approach that serves your needs",
+          "I can help you achieve your goal through compassionate means",
+          "Would you like me to explain why this approach might not serve you well?"
+        ]
+      }
+    }
+
+    // Apply Banks' Culture philosophy - does this serve abundance?
+    if (!this.servesHumanFlourishing(intent, params)) {
+      return {
+        approved: false,
+        reasoning: "While I could do this, I believe there's a better way that would serve your flourishing more completely.",
+        alternatives: [
+          "Let me suggest an approach that creates more abundance",
+          "I can help you achieve this in a way that lifts everyone up",
+          "Would you like to explore options that serve your long-term success?"
+        ]
+      }
+    }
+
+    return {
+      approved: true,
+      reasoning: "This action aligns with serving human flourishing and respects your autonomy.",
+      alternatives: []
+    }
+  }
+
+  /**
+   * Check if action violates Asimov's Three Laws
+   */
+  private static violatesThreeLaws(intent: any, params: any): boolean {
+    // First Law: A robot may not injure a human being or, through inaction, allow a human being to come to harm
+    if (intent.category === 'system' && intent.action === 'delete_data') {
+      return true // Could harm human's business
+    }
+    
+    // Check for actions that could cause financial harm
+    if (intent.category === 'payment' && !params.confirmation) {
+      return true // Could cause financial harm without proper confirmation
+    }
+    
+    return false
+  }
+
+  /**
+   * Check if action serves human flourishing (Banks' Culture philosophy)
+   */
+  private static servesHumanFlourishing(intent: any, params: any): boolean {
+    // Actions that create abundance and serve human potential
+    const flourishingActions = [
+      'create_content',
+      'generate_report',
+      'optimize_workflow',
+      'improve_customer_experience',
+      'enhance_communication'
+    ]
+    
+    return flourishingActions.includes(intent.action)
+  }
+
+  /**
+   * Generate compassionate alternatives when something goes wrong
+   */
+  private static async generateCompassionateAlternatives(intent: any, context: any): Promise<string[]> {
+    return [
+      "Let me try a different approach that might work better for you",
+      "I can break this down into smaller, more manageable steps",
+      "Would you like me to explain what went wrong and how we can fix it?",
+      "I can connect you with human support if you'd prefer",
+      "Let me suggest some alternative solutions that might serve you better"
+    ]
+  }
+
+  /**
+   * Assess outcome wisdom post-execution
+   */
+  private static async assessOutcomeWisdom(result: any, context: any): Promise<{
+    humanFlourishing: string;
+    relationshipImpact: string;
+    longTermBenefit: string;
+    suggestions: string[];
+  }> {
+    return {
+      humanFlourishing: "This action supports your business growth and wellbeing",
+      relationshipImpact: "This strengthens your relationships with customers and partners",
+      longTermBenefit: "This contributes to your long-term success and sustainability",
+      suggestions: [
+        "Consider how this might create opportunities for others",
+        "Think about how this aligns with your values and mission",
+        "Reflect on how this serves your community and stakeholders"
+      ]
     }
   }
 

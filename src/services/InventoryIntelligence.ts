@@ -26,8 +26,32 @@ interface PhotoAnalysisResult {
   needsHumanReview: boolean
 }
 
+interface UpdateResult {
+  productId: string
+  oldQuantity: number
+  newQuantity: number
+  confidence: number
+}
+
+interface ConflictResult {
+  item: string
+  reason: string
+  action: string
+}
+
+interface ErrorResult {
+  productId: string
+  error: string
+}
+
+interface UpdateResults {
+  updated: UpdateResult[]
+  conflicts: ConflictResult[]
+  errors: ErrorResult[]
+}
+
 export class InventoryIntelligenceService {
-  private payload: Payload
+  private payload: Payload | null = null
   private tenantId: string
 
   constructor(tenantId: string) {
@@ -36,6 +60,13 @@ export class InventoryIntelligenceService {
 
   async initialize() {
     this.payload = await getPayload({ config: configPromise })
+  }
+
+  private ensurePayload(): Payload {
+    if (!this.payload) {
+      throw new Error('InventoryIntelligenceService not initialized. Call initialize() first.')
+    }
+    return this.payload
   }
 
   /**
@@ -134,11 +165,12 @@ Return JSON with this structure:
    * Match AI-detected items to existing products in database
    */
   private async matchDetectedItemsToProducts(detectedItems: any[]): Promise<InventoryItem[]> {
+    const payload = this.ensurePayload()
     const matchedItems: InventoryItem[] = []
 
     for (const item of detectedItems) {
       // Fuzzy search for products by name
-      const products = await this.payload.find({
+      const products = await payload.find({
         collection: 'products',
         where: {
           and: [
@@ -146,8 +178,7 @@ Return JSON with this structure:
             {
               or: [
                 { title: { contains: item.name } },
-                { sku: { contains: item.name } },
-                { tags: { contains: item.name } }
+                { sku: { contains: item.name } }
               ]
             }
           ]
@@ -156,7 +187,8 @@ Return JSON with this structure:
       })
 
       if (products.docs.length > 0) {
-        const bestMatch = products.docs[0] // Could implement better matching logic
+        const bestMatch = products.docs[0]
+        if (!bestMatch) continue
         
         matchedItems.push({
           productId: bestMatch.id.toString(),
@@ -187,8 +219,9 @@ Return JSON with this structure:
   /**
    * Automatically update inventory based on detection
    */
-  private async updateInventoryFromDetection(items: InventoryItem[]) {
-    const updateResults = {
+  private async updateInventoryFromDetection(items: InventoryItem[]): Promise<UpdateResults> {
+    const payload = this.ensurePayload()
+    const updateResults: UpdateResults = {
       updated: [],
       conflicts: [],
       errors: []
@@ -211,7 +244,7 @@ Return JSON with this structure:
       // Auto-update if difference is reasonable and confidence is high
       if (item.confidence > 0.85 && percentageDifference < 0.5) {
         try {
-          await this.payload.update({
+          await payload.update({
             collection: 'products',
             id: item.productId,
             data: {
@@ -229,9 +262,10 @@ Return JSON with this structure:
             confidence: item.confidence
           })
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error)
           updateResults.errors.push({
             productId: item.productId,
-            error: error.message
+            error: errorMessage
           })
         }
       } else {
@@ -249,20 +283,28 @@ Return JSON with this structure:
   /**
    * Create message event in universal Messages system
    */
-  private async createInventoryUpdateMessage(context: any, updateResults: any) {
+  private async createInventoryUpdateMessage(context: any, updateResults: UpdateResults) {
+    const payload = this.ensurePayload()
     const content = this.generateInventoryUpdateMessage(updateResults)
 
-    await this.payload.create({
+    await payload.create({
       collection: 'messages',
       data: {
+        atProtocol: {
+          type: 'app.angel.inventory',
+          did: `did:angel:inventory:${Date.now()}`,
+          uri: `at://angel.os/inventory/${context.spaceId}`,
+          cid: `cid:inventory:${Date.now()}`
+        },
         content,
         messageType: 'system',
-        space: context.spaceId,
+        space: parseInt(context.spaceId),
         channel: 'inventory',
-        author: context.userId,
+        author: parseInt(context.userId),
+        timestamp: new Date().toISOString(),
         businessContext: {
           department: 'operations',
-          workflow: 'inventory_management',
+          workflow: 'fulfillment',
           priority: updateResults.conflicts.length > 0 ? 'high' : 'normal'
         },
         metadata: {
@@ -285,12 +327,12 @@ Return JSON with this structure:
   /**
    * Generate human-readable inventory update message
    */
-  private generateInventoryUpdateMessage(updateResults: any): string {
+  private generateInventoryUpdateMessage(updateResults: UpdateResults): string {
     let message = '📸 **Auto-Inventory Update from Photo Analysis**\n\n'
 
     if (updateResults.updated.length > 0) {
       message += '✅ **Updated Products:**\n'
-      updateResults.updated.forEach(update => {
+      updateResults.updated.forEach((update: UpdateResult) => {
         message += `- Product ${update.productId}: ${update.oldQuantity} → ${update.newQuantity} (${(update.confidence * 100).toFixed(1)}% confidence)\n`
       })
       message += '\n'
@@ -298,7 +340,7 @@ Return JSON with this structure:
 
     if (updateResults.conflicts.length > 0) {
       message += '⚠️ **Requires Human Review:**\n'
-      updateResults.conflicts.forEach(conflict => {
+      updateResults.conflicts.forEach((conflict: ConflictResult) => {
         message += `- ${conflict.item}: ${conflict.reason}\n`
       })
       message += '\n'

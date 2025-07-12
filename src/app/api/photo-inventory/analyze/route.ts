@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     const payload = await getPayload({ config })
     const formData = await request.formData()
     
-    const sequenceType = formData.get('sequence_type') as string
+    const sequenceType = formData.get('sequence_type') as 'general' | 'mileage_log' | 'collection_inventory' | 'business_inventory'
     const location = formData.get('location') as string
     const description = formData.get('description') as string
     const tenantId = formData.get('tenant_id') as string
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     // Store analysis results
     const analysisRecord = await payload.create({
-      collection: 'PhotoAnalysis',
+      collection: 'photo-analysis',
       data: {
         tenantId,
         guardianAngelId,
@@ -134,7 +134,7 @@ async function analyzeCollection(photos: File[], description: string) {
     collection_data: {
       collection_type: detectedType,
       total_items: itemCount,
-      categorized_items: { [detectedType]: itemCount },
+      categorized_items: { [detectedType as string]: itemCount },
       estimated_total_value: items.reduce((sum, item) => sum + (item.estimated_value || 0), 0),
       condition_summary: 'Mixed condition, mostly good to excellent'
     }

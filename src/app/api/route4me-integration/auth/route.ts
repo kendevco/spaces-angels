@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     console.log('[Route4Me Auth] OAuth flow initiated for franchise operations')
 
     // Get the current origin for callback URL
-    const headersList = headers()
+    const headersList = await headers()
     const origin = headersList.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
     // For demo purposes, we'll simulate the OAuth flow

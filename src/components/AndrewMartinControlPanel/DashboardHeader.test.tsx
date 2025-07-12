@@ -7,15 +7,18 @@ import type { UserProfile, NotificationCenter, QuickAction } from '@/types/andre
 
 // Mock data for the DashboardHeader props
 const mockUserProfile: UserProfile = {
+  id: 'test-user-1',
   name: 'Test User',
   email: 'test@example.com',
   avatarUrl: '/test-avatar.png',
+  role: 'admin',
+  lastActive: new Date().toISOString(),
 };
 
 const mockNotifications: NotificationCenter = {
   notifications: [
-    { id: '1', message: 'Test notification 1', type: 'info', timestamp: new Date(), read: false },
-    { id: '2', message: 'Test notification 2', type: 'success', timestamp: new Date(), read: true },
+    { id: '1', title: 'Info Alert', message: 'Test notification 1', type: 'info', timestamp: new Date(), read: false },
+    { id: '2', title: 'Success Alert', message: 'Test notification 2', type: 'success', timestamp: new Date(), read: true },
   ],
   unreadCount: 1,
 };

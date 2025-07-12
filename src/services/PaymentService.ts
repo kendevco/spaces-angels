@@ -1,6 +1,5 @@
 // Payment Service - Stripe Connect integration for Angel OS
-import { PaymentResult, PaymentFees } from '../types/browser-automation'
-import { EthicalAssessment } from '../types/ship-mind'
+import { PaymentResult, PaymentFees, EthicalAssessment } from '../types/browser-automation'
 
 export interface PaymentRequest {
   amount: number

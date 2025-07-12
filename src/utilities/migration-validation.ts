@@ -136,6 +136,7 @@ export async function validateOverallIntegrity(
       });
 
       for (const parentDoc of parentDocsResult.docs) {
+        if (!jsonFieldName) continue;
         const jsonField = parentDoc[jsonFieldName];
         if (jsonField && arrayFieldName && Array.isArray(jsonField[arrayFieldName])) {
           migratedCount += jsonField[arrayFieldName].length;
@@ -157,11 +158,12 @@ export async function validateOverallIntegrity(
     console.log(`[Validation] Overall counts - Original: ${results.totalOriginal}, Migrated: ${results.totalMigrated}. Issues: ${results.issues.length}`);
 
   } catch (error) {
-     if (error.message && error.message.includes(`Collection with slug '${sourceCollectionSlug}' not found`)) {
+     const errorMessage = error instanceof Error ? error.message : String(error);
+     if (errorMessage.includes(`Collection with slug '${sourceCollectionSlug}' not found`)) {
         console.warn(`[Validation] Source collection ${sourceCollectionSlug} not found. Skipping overall integrity count for it.`);
      } else {
         console.error(`[Validation] Error during overall integrity check for ${sourceCollectionSlug}:`, error);
-        results.issues.push(`Error during check: ${error.message}`);
+        results.issues.push(`Error during check: ${errorMessage}`);
      }
   }
   return results;

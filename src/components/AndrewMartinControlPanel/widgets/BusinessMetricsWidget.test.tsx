@@ -7,17 +7,42 @@ import type { BusinessMetricsProps, KPIMetric, TrendIndicator, BusinessAlert, AI
 
 const mockBusinessMetrics: BusinessMetricsProps = {
   kpis: [
-    { id: 'kpi1', name: 'Active Users', value: '1,234', trend: 'up' },
-    { id: 'kpi2', name: 'Revenue', value: '$50,000', unit: 'USD', trend: 'stable' },
+    { id: 'kpi1', name: 'Active Users', value: 1234, unit: 'users', change: 10, changeType: 'increase', trend: 'up' },
+    { id: 'kpi2', name: 'Revenue', value: 50000, unit: 'USD', change: 5, changeType: 'increase', trend: 'stable' },
   ],
   trends: [
-    { id: 'trend1', name: 'User Growth', currentValue: 1234, previousValue: 1000, period: 'vs last month' },
+    { 
+      id: 'trend1', 
+      name: 'User Growth', 
+      metric: 'user_growth',
+      direction: 'up',
+      percentage: 23.4,
+      timeframe: 'monthly',
+      currentValue: 1234, 
+      previousValue: 1000, 
+      period: 'vs last month' 
+    },
   ],
   alerts: [
-    { id: 'alert1', severity: 'critical', title: 'System Down', description: 'Main system is offline.', timestamp: new Date() },
+    { 
+      id: 'alert1', 
+      severity: 'critical', 
+      title: 'System Down', 
+      description: 'Main system is offline.', 
+      message: 'Main system is offline.',
+      timestamp: new Date().toISOString(),
+      resolved: false
+    },
   ],
   recommendations: [
-    { id: 'rec1', title: 'Optimize Checkout', description: 'Improve checkout conversion by 10%.' },
+    { 
+      id: 'rec1', 
+      title: 'Optimize Checkout', 
+      description: 'Improve checkout conversion by 10%.',
+      impact: 'high',
+      effort: 'medium',
+      category: 'conversion'
+    },
   ],
 };
 

@@ -873,7 +873,7 @@ export const seed = async ({
           slug: service.slug,
           description: service.description,
           sku: `${service.slug.toUpperCase().replace(/-/g, '_')}_001`,
-        productType: 'consultation',
+        productType: 'business_service',
         status: 'active',
           tenant: tenant.id,
           categories: [categoryId],

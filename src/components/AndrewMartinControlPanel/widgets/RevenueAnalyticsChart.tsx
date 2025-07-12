@@ -5,7 +5,7 @@ import styles from '../styles.module.css'; // Assuming shared styles
 
 const RevenueAnalyticsChart: React.FC<RevenueAnalyticsProps> = ({
   timeframe,
-  spaces,
+  data,
   comparison,
   breakdown,
 }) => {
@@ -22,10 +22,10 @@ const RevenueAnalyticsChart: React.FC<RevenueAnalyticsProps> = ({
       </div>
       <div className={styles.chartPlaceholder}>
         {/* This div would contain the actual chart */}
-        <p>Chart Area for {spaces.length} space(s)</p>
-        {spaces.map(space => (
-          <div key={space.spaceId} style={{ marginBottom: '10px', padding: '5px', border: '1px dashed #ccc' }}>
-            <strong>{space.spaceName}</strong>: Revenue - {space.revenue.join(', ')}
+        <p>Chart Area for {data.length} data point(s)</p>
+        {data.map((dataPoint, index) => (
+          <div key={index} style={{ marginBottom: '10px', padding: '5px', border: '1px dashed #ccc' }}>
+            <strong>{dataPoint.date}</strong>: Revenue - ${dataPoint.revenue.toLocaleString()}, Orders - {dataPoint.orders}, AOV - ${dataPoint.averageOrderValue}
           </div>
         ))}
         {/* Mock visual representation */}
