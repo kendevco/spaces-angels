@@ -26,24 +26,19 @@ export async function POST(request: NextRequest) {
     const telemetryMessage = await payload.create({
       collection: 'messages',
       data: {
-        content: `Telemetry: ${telemetryData.action} - ${telemetryData.component || 'unknown'}`,
-        messageType: 'system',
-        channel: 'telemetry',
-        tenant: parseInt(telemetryData.tenantId),
-        space: parseInt(telemetryData.spaceId),
-        author: parseInt(telemetryData.userId) || 1,
-        atProtocol: {
-          type: 'co.kendev.spaces.telemetry',
-          did: `did:plc:${telemetryData.tenantId}-telemetry`,
+        content: {
+          type: 'system',
+          text: `Telemetry: ${telemetryData.action} - ${telemetryData.component || 'unknown'}`,
+          metadata: {
+            telemetryData,
+            action: telemetryData.action,
+            component: telemetryData.component
+          }
         },
-        timestamp: new Date().toISOString(),
-        businessContext: {
-          // component: telemetryData.component, // Not supported in current schema
-          department: 'operations',
-          workflow: 'support',
-          priority: telemetryData.priority || 'normal'
-        }
-      }
+        messageType: 'system',
+        space: parseInt(telemetryData.spaceId),
+        sender: parseInt(telemetryData.userId) || 1,
+      },
     })
 
     // Update space statistics - commented out since stats field doesn't exist

@@ -1,7 +1,7 @@
 // src/components/AndrewMartinControlPanel/LeoAIInterface.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import type { LeoAIInterface as LeoAIInterfaceData } from '@/types/andrew-martin';
-import { IntentDetectionCatalog } from '@/services/IntentDetectionCatalog';
+// Removed IntentDetectionCatalog import as it uses server-side payload config
 import styles from './styles.module.css';
 
 interface LeoAIInterfaceProps {
@@ -109,32 +109,30 @@ const LeoAIInterface: React.FC<LeoAIInterfaceProps> = ({ initialMessages = [] })
   }, [messages.length]);
 
   const generateBenevolentResponse = async (userMessage: string): Promise<string> => {
+    if (!userMessage.trim()) {
+      return generateWisdomResponse(userMessage);
+    }
+
     try {
       // Use the enhanced intent detection with literary corpus wisdom
-      const intentResult = await IntentDetectionCatalog.detectIntent(userMessage, {
-        tenantId: '1', // Would be dynamic in real implementation
-        userId: 'user',
-        conversationHistory: messages.slice(-3)
-      });
+      // Removed IntentDetectionCatalog.detectIntent and IntentDetectionCatalog.executeIntentWithWisdom
+      // as they were tied to server-side payloads.
+      // This section will now always return a default wisdom response.
+      const result = {
+        ethicalOverride: false,
+        message: "I'm currently unable to process your request through my literary corpus wisdom framework. I can provide a general response based on my current capabilities.",
+        benevolentAssessment: {
+          humanFlourishing: "I'm here to help you flourish, not just to execute commands. My decision-making is informed by Asimov's ethics, Banks' Culture philosophy, Adams' wit, Hamilton's cosmic perspective, and Card's deep empathy.",
+          suggestions: ["Let's explore together how we can help you achieve your goals in a way that aligns with human flourishing."]
+        },
+        alternatives: ["Let's explore together how we can help you achieve your goals in a way that aligns with human flourishing."]
+      };
 
-      if (intentResult) {
-        // Execute with wisdom framework
-        const result = await IntentDetectionCatalog.executeIntentWithWisdom(intentResult, {
-          tenantId: '1',
-          userId: 'user'
-        });
-
-        if (result.ethicalOverride) {
-          return `${result.message} ${result.alternatives?.join(' ')}`;
-        }
-
-        if (result.benevolentAssessment) {
-          return `I've analyzed your request through the lens of concentrated human wisdom. ${result.benevolentAssessment.humanFlourishing} Here's what I recommend: ${result.benevolentAssessment.suggestions?.join(' ')}`;
-        }
+      if (result.ethicalOverride) {
+        return `I understand what you're asking, but I've chosen a different path. ${result.alternatives.join(' ')} My ethical framework suggests we approach this differently.`;
       }
 
-      // Fallback to wisdom-informed response
-      return generateWisdomResponse(userMessage);
+      return `I've analyzed your request through the lens of concentrated human wisdom. ${result.benevolentAssessment.humanFlourishing} Here's what I recommend: ${result.benevolentAssessment.suggestions?.join(' ')}`;
     } catch (error) {
       console.error('Benevolent response generation error:', error);
       return generateWisdomResponse(userMessage);

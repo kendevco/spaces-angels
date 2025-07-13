@@ -138,7 +138,7 @@ const Channels: CollectionConfig = {
       ],
     },
     {
-      name: 'phyleEconomics',
+      name: 'economics',
       type: 'group',
       label: 'Phyle Economics',
       fields: [
@@ -156,7 +156,7 @@ const Channels: CollectionConfig = {
           ],
         },
         {
-          name: 'economicModel',
+          name: 'model',
           type: 'group',
           fields: [
             {
@@ -195,7 +195,7 @@ const Channels: CollectionConfig = {
               ],
             },
             {
-              name: 'revenueSharingModel',
+              name: 'sharing',
               type: 'select',
               options: [
                 { label: 'Fixed Fee', value: 'fixed_fee' },
@@ -208,7 +208,7 @@ const Channels: CollectionConfig = {
           ],
         },
         {
-          name: 'economicStats',
+          name: 'stats',
           type: 'group',
           fields: [
             {

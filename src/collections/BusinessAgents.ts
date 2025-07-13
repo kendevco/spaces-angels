@@ -248,7 +248,7 @@ export const BusinessAgents: CollectionConfig = {
 
     // Operational Settings
     {
-      name: 'operationalSettings',
+      name: 'ops',
       type: 'group',
       label: 'Operational Settings',
       fields: [
@@ -261,7 +261,7 @@ export const BusinessAgents: CollectionConfig = {
           },
         },
         {
-          name: 'operatingHours',
+          name: 'hours',
           type: 'group',
           fields: [
             {
@@ -335,7 +335,7 @@ export const BusinessAgents: CollectionConfig = {
 
     // AI Integration
     {
-      name: 'aiIntegration',
+      name: 'ai',
       type: 'group',
       label: 'AI Integration',
       fields: [
@@ -355,7 +355,7 @@ export const BusinessAgents: CollectionConfig = {
           },
         },
         {
-          name: 'responseStyle',
+          name: 'style',
           type: 'group',
           fields: [
             {
@@ -372,7 +372,7 @@ export const BusinessAgents: CollectionConfig = {
               defaultValue: true,
             },
             {
-              name: 'formalityLevel',
+              name: 'formality',
               type: 'select',
               options: [
                 { label: 'Very Casual', value: 'very_casual' },
@@ -458,7 +458,7 @@ export const BusinessAgents: CollectionConfig = {
 
     // Humanitarian Capabilities
     {
-      name: 'humanitarianCapabilities',
+      name: 'humanitarian',
       type: 'group',
       label: 'Humanitarian Agent Capabilities',
       admin: {
@@ -467,7 +467,7 @@ export const BusinessAgents: CollectionConfig = {
       },
       fields: [
         {
-          name: 'legalResearch',
+          name: 'legal',
           type: 'group',
           label: 'Legal Research & Advocacy',
           fields: [
@@ -480,7 +480,7 @@ export const BusinessAgents: CollectionConfig = {
               },
             },
             {
-              name: 'accessibleDatabases',
+              name: 'databases',
               type: 'select',
               hasMany: true,
               options: [
@@ -551,7 +551,7 @@ export const BusinessAgents: CollectionConfig = {
           ],
         },
         {
-          name: 'resourceOrdering',
+          name: 'resources',
           type: 'group',
           label: 'Resource Ordering & Procurement',
           fields: [
@@ -564,7 +564,7 @@ export const BusinessAgents: CollectionConfig = {
               },
             },
             {
-              name: 'approvedVendors',
+              name: 'vendors',
               type: 'array',
               admin: {
                 condition: (data) => data?.enabled === true,
@@ -572,12 +572,12 @@ export const BusinessAgents: CollectionConfig = {
               },
               fields: [
                 {
-                  name: 'vendorName',
+                  name: 'name',
                   type: 'text',
                   required: true,
                 },
                 {
-                  name: 'vendorType',
+                  name: 'type',
                   type: 'select',
                   options: [
                     { label: 'Book Supplier', value: 'books' },
@@ -608,7 +608,7 @@ export const BusinessAgents: CollectionConfig = {
           ],
         },
         {
-          name: 'avatarRepresentation',
+          name: 'avatar',
           type: 'group',
           label: 'Avatar & Digital Presence',
           fields: [
@@ -621,7 +621,7 @@ export const BusinessAgents: CollectionConfig = {
               },
             },
             {
-              name: 'representationScope',
+              name: 'scope',
               type: 'select',
               hasMany: true,
               options: [
@@ -687,9 +687,8 @@ export const BusinessAgents: CollectionConfig = {
             { label: 'Friendly Professional', value: 'EXAVITQu4vr4xnSDxMaL' },
             { label: 'Confident Business', value: 'ErXwobaYiN019PkySvjV' },
             { label: 'Warm Service', value: 'VR6AewLTigWG4xSOukaG' },
-            { label: 'Tech Support', value: 'pNInz6obpgDQGcFmaJgB' },
           ],
-          defaultValue: 'pNInz6obpgDQGcFmaJgB',
+          defaultValue: 'EXAVITQu4vr4xnSDxMaL',
           admin: {
             description: 'ElevenLabs voice ID for this agent'
           },
@@ -785,10 +784,10 @@ export const BusinessAgents: CollectionConfig = {
     beforeChange: [
       ({ req, data }) => {
         // Auto-generate system prompt if not provided
-        if (data && !data.aiIntegration?.systemPrompt && data.name && data.personality) {
+        if (data && !data.ai?.systemPrompt && data.name && data.personality) {
           const { coreValues, communicationStyle, brandVoice } = data.personality
-          data.aiIntegration = {
-            ...data.aiIntegration,
+          data.ai = {
+            ...data.ai,
             systemPrompt: `You are ${data.name}, the spirit and embodiment of this business endeavor.
 
 Core Values: ${coreValues || 'Not specified'}

@@ -321,7 +321,7 @@ export const Spaces: CollectionConfig = {
       name: 'monetization',
       type: 'group',
       label: 'Creator Monetization',
-      dbName: 'monet',
+      dbName: 'mon',
       admin: {
         description: 'OnlyFans-style creator monetization features',
         condition: (data) => data?.businessIdentity?.type === 'creator' || data?.commerceSettings?.enableSubscriptions,
@@ -339,6 +339,7 @@ export const Spaces: CollectionConfig = {
           name: 'subscriptionTiers',
           type: 'array',
           label: 'Subscription Tiers',
+          dbName: 'sub_tiers',
           admin: {
             description: 'Create subscription tiers for premium content access',
             condition: (data) => data?.monetization?.enabled === true,
@@ -389,6 +390,7 @@ export const Spaces: CollectionConfig = {
               name: 'contentAccess',
               type: 'select',
               hasMany: true,
+              dbName: 'content_access',
               options: [
                 { label: 'Premium Posts', value: 'premium_posts' },
                 { label: 'Exclusive Videos', value: 'exclusive_videos' },
@@ -404,6 +406,7 @@ export const Spaces: CollectionConfig = {
             {
               name: 'stripePriceId',
               type: 'text',
+              dbName: 'stripe_price',
               admin: {
                 description: 'Stripe Price ID for payment processing',
                 readOnly: true,
@@ -415,6 +418,7 @@ export const Spaces: CollectionConfig = {
           name: 'donationsEnabled',
           type: 'checkbox',
           defaultValue: false,
+          dbName: 'donations',
           admin: {
             description: 'Enable tips/donations from fans',
             condition: (data) => data?.monetization?.enabled === true,
@@ -424,6 +428,7 @@ export const Spaces: CollectionConfig = {
           name: 'customPricing',
           type: 'group',
           label: 'Custom Content Pricing',
+          dbName: 'custom',
           admin: {
             description: 'Pay-per-view content and custom requests',
             condition: (data) => data?.monetization?.enabled === true,
@@ -440,6 +445,7 @@ export const Spaces: CollectionConfig = {
             {
               name: 'defaultPrice',
               type: 'number',
+              dbName: 'default_price',
               admin: {
                 description: 'Default price for custom content requests',
               },
@@ -447,6 +453,7 @@ export const Spaces: CollectionConfig = {
             {
               name: 'minimumTip',
               type: 'number',
+              dbName: 'min_tip',
               admin: {
                 description: 'Minimum tip amount',
               },
@@ -456,245 +463,156 @@ export const Spaces: CollectionConfig = {
         {
           name: 'merchantAccount',
           type: 'text',
+          dbName: 'merchant',
           admin: {
             description: 'Stripe Connect Account ID for direct payments',
             condition: (data) => data?.monetization?.enabled === true,
           },
         },
+        // Flattened revenue share settings to prevent long field names
         {
-          name: 'revenueShare',
-          type: 'group',
-          label: 'Platform Revenue Share',
-          dbName: 'rev_share',
+          name: 'revenueAgreementType',
+          type: 'select',
+          dbName: 'rev_type',
+          options: [
+            { label: 'Standard Rate (15%) - Full Service', value: 'standard' },
+            { label: 'Negotiated Rate', value: 'negotiated' },
+            { label: 'Performance Based', value: 'performance' },
+            { label: 'Volume Tiered', value: 'volume' },
+            { label: 'AI Optimized', value: 'ai-optimized' },
+          ],
+          defaultValue: 'standard',
           admin: {
-            description: 'Negotiable platform commission settings',
+            description: 'Revenue sharing agreement type',
             condition: (data) => data?.monetization?.enabled === true,
           },
-          fields: [
-            {
-              name: 'agreementType',
-              type: 'select',
-              dbName: 'agreement_type',
-              options: [
-                { label: 'Standard Rate (15%) - Full Service', value: 'standard' },
-                { label: 'Negotiated Rate', value: 'negotiated' },
-                { label: 'Performance Based', value: 'performance' },
-                { label: 'Volume Tiered', value: 'volume' },
-                { label: 'AI Optimized', value: 'ai-optimized' },
-              ],
-              defaultValue: 'standard',
-              admin: {
-                description: 'Revenue sharing agreement type',
-              },
-            },
-            {
-              name: 'platformFee',
-              type: 'number',
-              defaultValue: 20,
-              min: 8,
-              max: 30,
-              admin: {
-                description: 'Platform fee percentage (8-30%) - Includes marketing, infrastructure, and business automation',
-              },
-            },
-            {
-              name: 'terms',
-              type: 'group',
-              dbName: 'neg_terms',
-              admin: {
-                condition: (data) => ['negotiated', 'performance', 'volume', 'ai-optimized'].includes(data?.agreementType),
-              },
-              fields: [
-                {
-                  name: 'contractId',
-                  type: 'text',
-                  admin: {
-                    description: 'Legal contract reference ID',
-                  },
-                },
-                {
-                  name: 'effectiveDate',
-                  type: 'date',
-                  admin: {
-                    description: 'When negotiated rates take effect',
-                  },
-                },
-                {
-                  name: 'reviewDate',
-                  type: 'date',
-                  admin: {
-                    description: 'Next rate review date',
-                  },
-                },
-                {
-                  name: 'volumeTiers',
-                  type: 'array',
-                  admin: {
-                    condition: (data) => data?.agreementType === 'volume',
-                    description: 'Volume-based fee tiers (higher volume = lower fees)',
-                  },
-                  fields: [
-                    {
-                      name: 'monthlyRevenue',
-                      type: 'number',
-                      required: true,
-                      admin: {
-                        description: 'Monthly revenue threshold ($)',
-                      },
-                    },
-                    {
-                      name: 'feePercentage',
-                      type: 'number',
-                      required: true,
-                      min: 0,
-                      max: 50,
-                      admin: {
-                        description: 'Platform fee at this tier (%)',
-                      },
-                    },
-                  ],
-                },
-                {
-                  name: 'baseFee',
-                  type: 'number',
-                  defaultValue: 20,
-                  admin: {
-                    condition: (data) => data?.agreementType === 'performance',
-                    description: 'Base platform fee percentage',
-                  },
-                },
-                {
-                  name: 'bonusThresholds',
-                  type: 'array',
-                  dbName: 'perf_bonus',
-                  admin: {
-                    condition: (data) => data?.agreementType === 'performance',
-                    description: 'Performance-based fee adjustments',
-                  },
-                  fields: [
-                    {
-                      name: 'metric',
-                      type: 'select',
-                      options: [
-                        { label: 'Monthly Active Users', value: 'mau' },
-                        { label: 'Revenue Growth', value: 'growth' },
-                        { label: 'Content Quality Score', value: 'quality' },
-                        { label: 'Platform Promotion', value: 'promotion' },
-                      ],
-                    },
-                    {
-                      name: 'threshold',
-                      type: 'number',
-                      admin: {
-                        description: 'Achievement threshold',
-                      },
-                    },
-                    {
-                      name: 'feeReduction',
-                      type: 'number',
-                      admin: {
-                        description: 'Fee reduction percentage',
-                      },
-                    },
-                  ],
-                },
-                {
-                  name: 'aiOptimization',
-                  type: 'group',
-                  dbName: 'ai_opt',
-                  admin: {
-                    condition: (data) => data?.agreementType === 'ai-optimized',
-                    description: 'AI-driven dynamic rate optimization',
-                  },
-                  fields: [
-                    {
-                      name: 'enabled',
-                      type: 'checkbox',
-                      defaultValue: false,
-                      admin: {
-                        description: 'Enable AI rate optimization',
-                      },
-                    },
-                    {
-                      name: 'algorithmVersion',
-                      type: 'text',
-                      dbName: 'algo_ver',
-                      admin: {
-                        description: 'AI algorithm version identifier',
-                      },
-                    },
-                    {
-                      name: 'optimizationFactors',
-                      type: 'select',
-                      hasMany: true,
-                      dbName: 'opt_factors',
-                      options: [
-                        { label: 'Revenue Velocity', value: 'velocity' },
-                        { label: 'User Engagement', value: 'engagement' },
-                        { label: 'Content Quality', value: 'quality' },
-                        { label: 'Platform Value', value: 'platform-value' },
-                        { label: 'Market Conditions', value: 'market' },
-                        { label: 'Competitive Position', value: 'competitive' },
-                      ],
-                      admin: {
-                        description: 'Factors for AI optimization',
-                      },
-                    },
-                    {
-                      name: 'feeRange',
-                      type: 'group',
-                      dbName: 'fee_range',
-                      fields: [
-                        {
-                          name: 'minimum',
-                          type: 'number',
-                          dbName: 'min',
-                          defaultValue: 8,
-                          admin: {
-                            description: 'Minimum fee percentage (AI floor)',
-                          },
-                        },
-                        {
-                          name: 'maximum',
-                          type: 'number',
-                          dbName: 'max',
-                          defaultValue: 25,
-                          admin: {
-                            description: 'Maximum fee percentage (AI ceiling)',
-                          },
-                        },
-                      ],
-                    },
-                    {
-                      name: 'encodedParameters',
-                      type: 'text',
-                      dbName: 'encoded_params',
-                      admin: {
-                        description: 'AI-encoded optimization parameters (system use only)',
-                        readOnly: true,
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              name: 'processingFee',
-              type: 'number',
-              defaultValue: 2.9,
-              admin: {
-                description: 'Payment processing fee percentage (Stripe)',
-              },
-            },
-            {
-              name: 'calculatedFee',
-              type: 'number',
-              admin: {
-                description: 'Current effective platform fee (auto-calculated)',
-                readOnly: true,
-              },
-            },
+        },
+        {
+          name: 'revenuePlatformFee',
+          type: 'number',
+          defaultValue: 20,
+          min: 8,
+          max: 30,
+          dbName: 'rev_fee',
+          admin: {
+            description: 'Platform fee percentage (8-30%) - Includes marketing, infrastructure, and business automation',
+            condition: (data) => data?.monetization?.enabled === true,
+          },
+        },
+        {
+          name: 'revenueContractId',
+          type: 'text',
+          dbName: 'rev_contract',
+          admin: {
+            description: 'Legal contract reference ID',
+            condition: (data) => data?.monetization?.enabled === true && ['negotiated', 'performance', 'volume', 'ai-optimized'].includes(data?.revenueAgreementType),
+          },
+        },
+        {
+          name: 'revenueEffectiveDate',
+          type: 'date',
+          dbName: 'rev_effective',
+          admin: {
+            description: 'When negotiated rates take effect',
+            condition: (data) => data?.monetization?.enabled === true && ['negotiated', 'performance', 'volume', 'ai-optimized'].includes(data?.revenueAgreementType),
+          },
+        },
+        {
+          name: 'revenueReviewDate',
+          type: 'date',
+          dbName: 'rev_review',
+          admin: {
+            description: 'Next rate review date',
+            condition: (data) => data?.monetization?.enabled === true && ['negotiated', 'performance', 'volume', 'ai-optimized'].includes(data?.revenueAgreementType),
+          },
+        },
+        // AI Optimization fields - flattened to prevent long names
+        {
+          name: 'aiOptEnabled',
+          type: 'checkbox',
+          defaultValue: false,
+          dbName: 'ai_enabled',
+          admin: {
+            description: 'Enable AI rate optimization',
+            condition: (data) => data?.monetization?.enabled === true && data?.revenueAgreementType === 'ai-optimized',
+          },
+        },
+        {
+          name: 'aiOptVersion',
+          type: 'text',
+          dbName: 'ai_version',
+          admin: {
+            description: 'AI algorithm version identifier',
+            condition: (data) => data?.monetization?.enabled === true && data?.aiOptEnabled === true,
+          },
+        },
+        {
+          name: 'aiOptFactors',
+          type: 'select',
+          hasMany: true,
+          dbName: 'ai_factors',
+          options: [
+            { label: 'Revenue Velocity', value: 'velocity' },
+            { label: 'User Engagement', value: 'engagement' },
+            { label: 'Content Quality', value: 'quality' },
+            { label: 'Platform Value', value: 'platform-value' },
+            { label: 'Market Conditions', value: 'market' },
+            { label: 'Competitive Position', value: 'competitive' },
           ],
+          admin: {
+            description: 'Factors for AI optimization',
+            condition: (data) => data?.monetization?.enabled === true && data?.aiOptEnabled === true,
+          },
+        },
+        {
+          name: 'aiOptFeeMin',
+          type: 'number',
+          defaultValue: 8,
+          dbName: 'ai_fee_min',
+          admin: {
+            description: 'Minimum fee percentage (AI floor)',
+            condition: (data) => data?.monetization?.enabled === true && data?.aiOptEnabled === true,
+          },
+        },
+        {
+          name: 'aiOptFeeMax',
+          type: 'number',
+          defaultValue: 25,
+          dbName: 'ai_fee_max',
+          admin: {
+            description: 'Maximum fee percentage (AI ceiling)',
+            condition: (data) => data?.monetization?.enabled === true && data?.aiOptEnabled === true,
+          },
+        },
+        {
+          name: 'aiOptParams',
+          type: 'text',
+          dbName: 'ai_params',
+          admin: {
+            description: 'AI-encoded optimization parameters (system use only)',
+            readOnly: true,
+            condition: (data) => data?.monetization?.enabled === true && data?.aiOptEnabled === true,
+          },
+        },
+        {
+          name: 'revenueProcessingFee',
+          type: 'number',
+          defaultValue: 2.9,
+          dbName: 'rev_proc_fee',
+          admin: {
+            description: 'Payment processing fee percentage (Stripe)',
+            condition: (data) => data?.monetization?.enabled === true,
+          },
+        },
+        {
+          name: 'revenueCalculatedFee',
+          type: 'number',
+          dbName: 'rev_calc_fee',
+          admin: {
+            description: 'Current effective platform fee (auto-calculated)',
+            readOnly: true,
+            condition: (data) => data?.monetization?.enabled === true,
+          },
         },
       ],
     },

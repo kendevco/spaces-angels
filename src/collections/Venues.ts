@@ -353,7 +353,7 @@ export const Venues: CollectionConfig = {
               defaultValue: 'internal',
             },
             {
-              name: 'inquickerConfig',
+              name: 'inquicker',
               type: 'group',
               label: 'InQuicker Configuration',
               admin: {
@@ -375,7 +375,7 @@ export const Venues: CollectionConfig = {
                   },
                 },
                 {
-                  name: 'enableRealTimeSync',
+                  name: 'realTimeSync',
                   type: 'checkbox',
                   defaultValue: true,
                   admin: {
@@ -383,7 +383,7 @@ export const Venues: CollectionConfig = {
                   },
                 },
                 {
-                  name: 'guardianAngelBooking',
+                  name: 'angelBooking',
                   type: 'checkbox',
                   defaultValue: true,
                   admin: {
@@ -391,7 +391,7 @@ export const Venues: CollectionConfig = {
                   },
                 },
                 {
-                  name: 'waitlistManagement',
+                  name: 'waitlist',
                   type: 'checkbox',
                   defaultValue: true,
                   admin: {
@@ -399,7 +399,7 @@ export const Venues: CollectionConfig = {
                   },
                 },
                 {
-                  name: 'cancellationPolicy',
+                  name: 'cancelPolicy',
                   type: 'textarea',
                   admin: {
                     description: 'Venue-specific cancellation policy for Guardian Angel to communicate',
@@ -410,11 +410,11 @@ export const Venues: CollectionConfig = {
           ],
         },
         {
-          name: 'paymentProcessing',
+          name: 'payment',
           type: 'group',
           fields: [
             {
-              name: 'acceptsPayments',
+              name: 'accepts',
               type: 'checkbox',
               defaultValue: true,
             },
@@ -426,11 +426,11 @@ export const Venues: CollectionConfig = {
               },
             },
             {
-              name: 'acceptedPaymentMethods',
+              name: 'methods',
               type: 'array',
               fields: [
                 {
-                  name: 'method',
+                  name: 'type',
                   type: 'select',
                   options: [
                     { label: 'Credit Card', value: 'credit_card' },
@@ -458,11 +458,11 @@ export const Venues: CollectionConfig = {
           defaultValue: true,
         },
         {
-          name: 'performanceMetrics',
+          name: 'metrics',
           type: 'group',
           fields: [
             {
-              name: 'averageRating',
+              name: 'avgRating',
               type: 'number',
               admin: {
                 readOnly: true,
@@ -486,7 +486,7 @@ export const Venues: CollectionConfig = {
               },
             },
             {
-              name: 'appointmentVolume',
+              name: 'appointments',
               type: 'number',
               admin: {
                 readOnly: true,
@@ -511,11 +511,11 @@ export const Venues: CollectionConfig = {
           },
         },
         {
-          name: 'angelCustomization',
+          name: 'custom',
           type: 'group',
           fields: [
             {
-              name: 'venueSpecificGreeting',
+              name: 'greeting',
               type: 'textarea',
               admin: {
                 description: 'Venue-specific greeting message',
@@ -523,7 +523,7 @@ export const Venues: CollectionConfig = {
               },
             },
             {
-              name: 'venueSpecificServices',
+              name: 'services',
               type: 'array',
               fields: [
                 { name: 'service', type: 'text' },

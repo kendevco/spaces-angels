@@ -513,23 +513,18 @@ Provide a helpful, contextually relevant response. If discussing the product, be
             cid: `cid:${message.id}`
           },
           content: message.content,
-          messageType: message.sender === 'customer' ? 'customer_inquiry' : 'ai_agent',
+          messageType: message.sender === 'customer' ? 'user' : 'leo',
           space: parseInt(context.tenantId),
-          channel: `seamless-${context.currentMode}`,
-          author: 1,
-          timestamp: new Date().toISOString(),
-          businessContext: {
-            department: context.businessContext.department as 'general' | 'sales' | 'support' | 'operations' | 'marketing',
-            workflow: context.businessContext.workflow as 'support' | 'knowledge' | 'fulfillment' | 'lead' | 'quote' | 'sale',
-            customerJourney: context.businessContext.customerJourney as 'discovery' | 'consideration' | 'purchase_intent' | 'active_customer' | 'support_request' | 'retention_risk'
-          },
-          metadata: {
-            seamlessConversation: {
-              sessionId: context.sessionId,
-              mode: message.mode,
-              productContext: context.productContext,
-              siteContext: context.siteContext
-            }
+          channel: null, // TODO: Create/find channel relationship
+          sender: 1,
+          conversationContext: {
+            department: context.businessContext.department,
+            workflow: context.businessContext.workflow,
+            customerJourney: context.businessContext.customerJourney,
+            sessionId: context.sessionId,
+            mode: message.mode,
+            productContext: context.productContext,
+            siteContext: context.siteContext
           }
         }
       })

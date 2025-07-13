@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       message: 'Test job added to queue',
       job: {
         id: job.id,
-        type: job.type,
+        type: job.jobType,
         status: job.status,
         priority: job.priority,
       }

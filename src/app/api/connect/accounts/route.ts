@@ -3,9 +3,10 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Initialize Stripe only when we have the secret key (not during build)
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-05-28.basil' as any,
-})
+}) : null
 
 /**
  * Create Connected Account for Creator/Business
@@ -15,6 +16,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
  */
 export async function POST(request: NextRequest) {
   try {
+    if (!stripe) {
+      return NextResponse.json({
+        error: 'Stripe configuration not available',
+        message: 'STRIPE_SECRET_KEY is not configured'
+      }, { status: 500 })
+    }
+
     const { userId, businessInfo, accountType = 'express' } = await request.json()
 
     if (!userId) {
@@ -164,6 +172,13 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
+    if (!stripe) {
+      return NextResponse.json({
+        error: 'Stripe configuration not available',
+        message: 'STRIPE_SECRET_KEY is not configured'
+      }, { status: 500 })
+    }
+
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
     const accountId = searchParams.get('accountId')
@@ -268,6 +283,13 @@ export async function GET(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   try {
+    if (!stripe) {
+      return NextResponse.json({
+        error: 'Stripe configuration not available',
+        message: 'STRIPE_SECRET_KEY is not configured'
+      }, { status: 500 })
+    }
+
     const { accountId, updates } = await request.json()
 
     if (!accountId) {

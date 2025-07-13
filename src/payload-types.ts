@@ -93,6 +93,7 @@ export interface Config {
     'business-agents': BusinessAgent;
     'humanitarian-agents': HumanitarianAgent;
     aiGenerationQueue: AiGenerationQueue;
+    'job-queue': JobQueue;
     channels: Channel;
     phyles: Phyle;
     'agent-reputation': AgentReputation;
@@ -137,6 +138,7 @@ export interface Config {
     'business-agents': BusinessAgentsSelect<false> | BusinessAgentsSelect<true>;
     'humanitarian-agents': HumanitarianAgentsSelect<false> | HumanitarianAgentsSelect<true>;
     aiGenerationQueue: AiGenerationQueueSelect<false> | AiGenerationQueueSelect<true>;
+    'job-queue': JobQueueSelect<false> | JobQueueSelect<true>;
     channels: ChannelsSelect<false> | ChannelsSelect<true>;
     phyles: PhylesSelect<false> | PhylesSelect<true>;
     'agent-reputation': AgentReputationSelect<false> | AgentReputationSelect<true>;
@@ -356,6 +358,26 @@ export interface Tenant {
      */
     maxStorage?: number | null;
   };
+  /**
+   * Consolidated configuration data for this tenant (memberships, revenue settings, integrations, business settings, limits, etc.). This field is managed programmatically by migration scripts.
+   */
+  jsonData?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Tracks the status of JSON data migration for this tenant.
+   */
+  _migrationStatus?: {
+    jsonMigrated?: boolean | null;
+    migratedAt?: string | null;
+    migrationVersion?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -512,6 +534,26 @@ export interface User {
   };
   timezone?: ('America/New_York' | 'America/Chicago' | 'America/Denver' | 'America/Los_Angeles') | null;
   theme?: ('light' | 'dark' | 'auto') | null;
+  /**
+   * Consolidated user preferences, including activity log, theme, timezone, and privacy settings. Managed programmatically.
+   */
+  preferences?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Tracks the status of JSON data migration for this user.
+   */
+  _migrationStatus?: {
+    jsonMigrated?: boolean | null;
+    migratedAt?: string | null;
+    migrationVersion?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -1048,110 +1090,57 @@ export interface Space {
      */
     merchantAccount?: string | null;
     /**
-     * Negotiable platform commission settings
+     * Revenue sharing agreement type
      */
-    revenueShare?: {
-      /**
-       * Revenue sharing agreement type
-       */
-      agreementType?: ('standard' | 'negotiated' | 'performance' | 'volume' | 'ai-optimized') | null;
-      /**
-       * Platform fee percentage (8-30%) - Includes marketing, infrastructure, and business automation
-       */
-      platformFee?: number | null;
-      terms?: {
-        /**
-         * Legal contract reference ID
-         */
-        contractId?: string | null;
-        /**
-         * When negotiated rates take effect
-         */
-        effectiveDate?: string | null;
-        /**
-         * Next rate review date
-         */
-        reviewDate?: string | null;
-        /**
-         * Volume-based fee tiers (higher volume = lower fees)
-         */
-        volumeTiers?:
-          | {
-              /**
-               * Monthly revenue threshold ($)
-               */
-              monthlyRevenue: number;
-              /**
-               * Platform fee at this tier (%)
-               */
-              feePercentage: number;
-              id?: string | null;
-            }[]
-          | null;
-        /**
-         * Base platform fee percentage
-         */
-        baseFee?: number | null;
-        /**
-         * Performance-based fee adjustments
-         */
-        bonusThresholds?:
-          | {
-              metric?: ('mau' | 'growth' | 'quality' | 'promotion') | null;
-              /**
-               * Achievement threshold
-               */
-              threshold?: number | null;
-              /**
-               * Fee reduction percentage
-               */
-              feeReduction?: number | null;
-              id?: string | null;
-            }[]
-          | null;
-        /**
-         * AI-driven dynamic rate optimization
-         */
-        aiOptimization?: {
-          /**
-           * Enable AI rate optimization
-           */
-          enabled?: boolean | null;
-          /**
-           * AI algorithm version identifier
-           */
-          algorithmVersion?: string | null;
-          /**
-           * Factors for AI optimization
-           */
-          optimizationFactors?:
-            | ('velocity' | 'engagement' | 'quality' | 'platform-value' | 'market' | 'competitive')[]
-            | null;
-          feeRange?: {
-            /**
-             * Minimum fee percentage (AI floor)
-             */
-            minimum?: number | null;
-            /**
-             * Maximum fee percentage (AI ceiling)
-             */
-            maximum?: number | null;
-          };
-          /**
-           * AI-encoded optimization parameters (system use only)
-           */
-          encodedParameters?: string | null;
-        };
-      };
-      /**
-       * Payment processing fee percentage (Stripe)
-       */
-      processingFee?: number | null;
-      /**
-       * Current effective platform fee (auto-calculated)
-       */
-      calculatedFee?: number | null;
-    };
+    revenueAgreementType?: ('standard' | 'negotiated' | 'performance' | 'volume' | 'ai-optimized') | null;
+    /**
+     * Platform fee percentage (8-30%) - Includes marketing, infrastructure, and business automation
+     */
+    revenuePlatformFee?: number | null;
+    /**
+     * Legal contract reference ID
+     */
+    revenueContractId?: string | null;
+    /**
+     * When negotiated rates take effect
+     */
+    revenueEffectiveDate?: string | null;
+    /**
+     * Next rate review date
+     */
+    revenueReviewDate?: string | null;
+    /**
+     * Enable AI rate optimization
+     */
+    aiOptEnabled?: boolean | null;
+    /**
+     * AI algorithm version identifier
+     */
+    aiOptVersion?: string | null;
+    /**
+     * Factors for AI optimization
+     */
+    aiOptFactors?: ('velocity' | 'engagement' | 'quality' | 'platform-value' | 'market' | 'competitive')[] | null;
+    /**
+     * Minimum fee percentage (AI floor)
+     */
+    aiOptFeeMin?: number | null;
+    /**
+     * Maximum fee percentage (AI ceiling)
+     */
+    aiOptFeeMax?: number | null;
+    /**
+     * AI-encoded optimization parameters (system use only)
+     */
+    aiOptParams?: string | null;
+    /**
+     * Payment processing fee percentage (Stripe)
+     */
+    revenueProcessingFee?: number | null;
+    /**
+     * Current effective platform fee (auto-calculated)
+     */
+    revenueCalculatedFee?: number | null;
   };
   integrations?: {
     youtube?: {
@@ -1319,6 +1308,26 @@ export interface Space {
      * Overall engagement score (0-100)
      */
     engagementScore?: number | null;
+  };
+  /**
+   * Consolidated business data for this space (messages, products, orders, etc.).
+   */
+  data?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Tracks the status of JSON data migration for this space.
+   */
+  _migrationStatus?: {
+    jsonMigrated?: boolean | null;
+    migratedAt?: string | null;
+    migrationVersion?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1641,208 +1650,14 @@ export interface Contact {
   createdAt: string;
 }
 /**
- * Real-time messaging system with threading, reactions, and rich content support
+ * Enhanced messaging system with rich JSON content, conversation context, and BI.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "messages".
  */
 export interface Message {
   id: number;
-  /**
-   * BlueSky/AT Protocol compatibility fields
-   */
-  atProtocol: {
-    /**
-     * AT Protocol record type (lexicon)
-     */
-    type: string;
-    /**
-     * Decentralized identifier for this message
-     */
-    did?: string | null;
-    /**
-     * AT Protocol URI for this record
-     */
-    uri?: string | null;
-    /**
-     * Content identifier hash
-     */
-    cid?: string | null;
-  };
-  /**
-   * User who created this message
-   */
-  author: number | User;
-  /**
-   * Space this message belongs to
-   */
-  space: number | Space;
-  /**
-   * Channel within the space (optional)
-   */
-  channel?: string | null;
-  /**
-   * Legacy tenant field - derived from space.tenant
-   */
-  tenant?: (number | null) | Tenant;
-  /**
-   * The actual message content
-   */
-  content: string;
-  /**
-   * Type of message for proper handling and display
-   */
-  messageType:
-    | 'text'
-    | 'image'
-    | 'file'
-    | 'widget'
-    | 'system'
-    | 'announcement'
-    | 'ai_agent'
-    | 'web_chat'
-    | 'voice_ai'
-    | 'customer_inquiry'
-    | 'live_handoff'
-    | 'system_alert';
-  /**
-   * Interactive widget content embedded in the message
-   */
-  widgetData?: {
-    /**
-     * Type of widget to display
-     */
-    widgetType:
-      | 'address_verification'
-      | 'web_capture'
-      | 'order_form'
-      | 'approval_workflow'
-      | 'poll'
-      | 'calendar_booking'
-      | 'payment_request'
-      | 'document_signature'
-      | 'custom';
-    /**
-     * Display title for the widget
-     */
-    widgetTitle?: string | null;
-    /**
-     * Widget-specific data and configuration
-     */
-    widgetData?:
-      | {
-          [k: string]: unknown;
-        }
-      | unknown[]
-      | string
-      | number
-      | boolean
-      | null;
-    /**
-     * Whether users can interact with this widget
-     */
-    isInteractive?: boolean | null;
-    /**
-     * Who can interact with this widget
-     */
-    allowedRoles?: ('all' | 'admin' | 'owner' | 'moderator')[] | null;
-    /**
-     * When this widget expires (optional)
-     */
-    expiresAt?: string | null;
-    /**
-     * User responses/interactions with the widget
-     */
-    responses?:
-      | {
-          [k: string]: unknown;
-        }
-      | unknown[]
-      | string
-      | number
-      | boolean
-      | null;
-  };
-  /**
-   * Parent message if this is a reply
-   */
-  parentMessage?: (number | null) | Message;
-  /**
-   * Replies to this message
-   */
-  threadReplies?: (number | Message)[] | null;
-  /**
-   * Attached files, images, or media
-   */
-  attachments?: (number | Media)[] | null;
-  /**
-   * Users mentioned in this message
-   */
-  mentions?: (number | User)[] | null;
-  /**
-   * Emoji reactions to this message
-   */
-  reactions?:
-    | {
-        /**
-         * Emoji used for reaction
-         */
-        emoji: string;
-        /**
-         * Users who reacted with this emoji
-         */
-        users?: (number | User)[] | null;
-        /**
-         * Number of reactions
-         */
-        count?: number | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Whether this message has been edited
-   */
-  isEdited?: boolean | null;
-  /**
-   * History of edits to this message
-   */
-  editHistory?:
-    | {
-        /**
-         * Previous content
-         */
-        content: string;
-        /**
-         * When the edit was made
-         */
-        editedAt: string;
-        /**
-         * Who made the edit
-         */
-        editedBy?: (number | null) | User;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Whether this message has been deleted
-   */
-  isDeleted?: boolean | null;
-  /**
-   * Who deleted this message
-   */
-  deletedBy?: (number | null) | User;
-  /**
-   * When this message was deleted
-   */
-  deletedAt?: string | null;
-  /**
-   * Message timestamp
-   */
-  timestamp: string;
-  /**
-   * Progressive JSON structure for extensible metadata
-   */
-  metadata?:
+  content:
     | {
         [k: string]: unknown;
       }
@@ -1851,35 +1666,89 @@ export interface Message {
     | number
     | boolean
     | null;
-  businessContext?: {
-    department?: ('sales' | 'support' | 'operations' | 'marketing' | 'general') | null;
-    workflow?: ('lead' | 'quote' | 'sale' | 'fulfillment' | 'support' | 'knowledge') | null;
-    /**
-     * Customer journey stage for this interaction
-     */
-    customerJourney?:
-      | ('discovery' | 'consideration' | 'purchase_intent' | 'active_customer' | 'support_request' | 'retention_risk')
+  conversationContext?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  businessIntelligence?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  sender: number | User;
+  space: number | Space;
+  channel?: (number | null) | Channel;
+  messageType: 'user' | 'leo' | 'system' | 'action' | 'intelligence';
+  priority?: ('low' | 'normal' | 'high' | 'urgent') | null;
+  readBy?: (number | User)[] | null;
+  reactions?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  threadId?: string | null;
+  replyToId?: (number | null) | Message;
+  /**
+   * BlueSky/AT Protocol compatibility fields
+   */
+  atProtocol?: {
+    type?: string | null;
+    did?: string | null;
+    uri?: string | null;
+    cid?: string | null;
+  };
+  attachments?: (number | Media)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "channels".
+ */
+export interface Channel {
+  id: number;
+  tenantId: string;
+  guardianAngelId?: string | null;
+  name: string;
+  description?: string | null;
+  channelType:
+    | 'photo_analysis'
+    | 'document_processing'
+    | 'data_collection'
+    | 'monitoring'
+    | 'intelligence_gathering'
+    | 'economic_analysis';
+  reportType:
+    | 'mileage_log'
+    | 'collection_inventory'
+    | 'business_inventory'
+    | 'equipment_status'
+    | 'asset_tracking'
+    | 'quality_control'
+    | 'maintenance_log'
+    | 'customer_interaction'
+    | 'general';
+  feedConfiguration?: {
+    feedSource?:
+      | ('google_photos' | 'google_drive' | 'onedrive' | 'dropbox' | 'amazon_s3' | 'manual_upload' | 'api_webhook')
       | null;
     /**
-     * Source system for this message
+     * Source-specific configuration (OAuth tokens, folder paths, etc.)
      */
-    integrationSource?: ('web_widget' | 'vapi_call' | 'internal_chat' | 'email' | 'api_webhook') | null;
-    priority?: ('low' | 'normal' | 'high' | 'urgent') | null;
-  };
-  knowledge?: {
-    /**
-     * Include in knowledge search results
-     */
-    searchable?: boolean | null;
-    category?: ('faq' | 'procedure' | 'customer_data' | 'product_info' | 'best_practice' | 'training') | null;
-    /**
-     * Tags for categorization and search
-     */
-    tags?: string[] | null;
-    /**
-     * AI vector embedding for semantic search
-     */
-    embedding?:
+    feedSettings?:
       | {
           [k: string]: unknown;
         }
@@ -1888,65 +1757,88 @@ export interface Message {
       | number
       | boolean
       | null;
-  };
-  /**
-   * Parent message for threading
-   */
-  thread?: (number | null) | Message;
-  /**
-   * Root message of the thread
-   */
-  threadRoot?: (number | null) | Message;
-  embeds?: {
     /**
-     * Images, videos, files attached to this message
+     * How often to check for new content (minutes)
      */
-    media?: (number | Media)[] | null;
-    links?:
+    pollingInterval?: number | null;
+    filters?: {
+      fileTypes?:
+        | {
+            type?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      keywords?:
+        | {
+            keyword?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      dateRange?: {
+        from?: string | null;
+        to?: string | null;
+      };
+    };
+  };
+  economics?: {
+    phyleAffiliation?:
+      | (
+          | 'collector_phyle'
+          | 'logistics_phyle'
+          | 'analyst_phyle'
+          | 'maintenance_phyle'
+          | 'quality_phyle'
+          | 'customer_service_phyle'
+          | 'independent_agent'
+        )
+      | null;
+    model?: {
+      /**
+       * Fee per item processed (in internal currency)
+       */
+      processingFee?: number | null;
+      /**
+       * Bonus for high accuracy/quality
+       */
+      accuracyBonus?: number | null;
+      /**
+       * Bonus for fast processing
+       */
+      speedBonus?: number | null;
+      volumeDiscounts?:
+        | {
+            threshold?: number | null;
+            discount?: number | null;
+            id?: string | null;
+          }[]
+        | null;
+      sharing?: ('fixed_fee' | 'percentage_split' | 'performance_based' | 'subscription' | 'phyle_collective') | null;
+    };
+    stats?: {
+      totalEarned?: number | null;
+      itemsProcessed?: number | null;
+      accuracyScore?: number | null;
+      phyleRank?: number | null;
+      reputation?: number | null;
+    };
+  };
+  processingRules?: {
+    autoProcessing?: boolean | null;
+    requiresHumanReview?: boolean | null;
+    confidenceThreshold?: number | null;
+    customPrompts?:
       | {
-          url: string;
-          title?: string | null;
-          description?: string | null;
+          trigger?: string | null;
+          prompt?: string | null;
           id?: string | null;
         }[]
       | null;
+    outputFormat?: ('json' | 'csv' | 'pdf' | 'excel') | null;
   };
-  federation?: {
-    /**
-     * Make this message discoverable on federated networks
-     */
-    discoverable?: boolean | null;
-    /**
-     * Platforms to cross-post this message to
-     */
-    crossPostTo?: ('app.bsky.feed.post' | 'mastodon' | 'activitypub')[] | null;
-    audience?: ('private' | 'business_network' | 'public') | null;
-  };
-  aiAgent?: {
-    /**
-     * Analysis from tenant Business AI agent
-     */
-    ceoAnalysis?:
-      | {
-          [k: string]: unknown;
-        }
-      | unknown[]
-      | string
-      | number
-      | boolean
-      | null;
-    /**
-     * AI-suggested follow-up actions
-     */
-    suggestedActions?: string | null;
-    /**
-     * Pipedream Index value for this message
-     */
-    pipedreamIndex?: number | null;
-  };
-  langs?: ('en' | 'es' | 'fr' | 'de')[] | null;
-  updatedAt: string;
+  status?: ('active' | 'paused' | 'maintenance' | 'deprecated') | null;
+  lastProcessed?: string | null;
   createdAt: string;
+  updatedAt: string;
 }
 /**
  * Web chat session management and analytics
@@ -3340,31 +3232,31 @@ export interface Organization {
       email?: string | null;
       phone?: string | null;
     };
-    revenueSharing?: {
+    sharing?: {
       /**
        * Organization-level platform fee %
        */
-      organizationRate?: number | null;
+      orgRate?: number | null;
       /**
        * Individual location additional fee %
        */
-      locationRate?: number | null;
-      volumeDiscounts?:
+      locRate?: number | null;
+      discounts?:
         | {
-            minimumLocations: number;
-            discountPercent: number;
+            minLocs: number;
+            percent: number;
             id?: string | null;
           }[]
         | null;
     };
   };
-  operationalSettings?: {
+  opsSettings?: {
     /**
      * Primary timezone for the organization
      */
     timezone?: string | null;
-    businessHours?: {
-      defaultSchedule?:
+    hours?: {
+      schedule?:
         | {
             dayOfWeek?: ('monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday') | null;
             openTime?: string | null;
@@ -3381,7 +3273,7 @@ export interface Organization {
       emergencyContact?: string | null;
     };
   };
-  integrationSettings?: {
+  integration?: {
     websites?:
       | {
           domain: string;
@@ -3403,10 +3295,10 @@ export interface Organization {
       webhookUrl?: string | null;
     };
   };
-  analyticsSettings?: {
-    enableAnalytics?: boolean | null;
-    reportingFrequency?: ('realtime' | 'daily' | 'weekly' | 'monthly') | null;
-    reportRecipients?:
+  analytics?: {
+    enabled?: boolean | null;
+    frequency?: ('realtime' | 'daily' | 'weekly' | 'monthly') | null;
+    recipients?:
       | {
           email: string;
           role?: string | null;
@@ -3593,7 +3485,7 @@ export interface Venue {
        */
       externalBookingUrl?: string | null;
       bookingSystemType?: ('internal' | 'epic' | 'inquicker' | 'acuity' | 'calendly' | 'custom') | null;
-      inquickerConfig?: {
+      inquicker?: {
         /**
          * InQuicker location ID for this venue
          */
@@ -3605,30 +3497,30 @@ export interface Venue {
         /**
          * Enable real-time availability sync with InQuicker
          */
-        enableRealTimeSync?: boolean | null;
+        realTimeSync?: boolean | null;
         /**
          * Allow Guardian Angel to book appointments via InQuicker
          */
-        guardianAngelBooking?: boolean | null;
+        angelBooking?: boolean | null;
         /**
          * Enable Guardian Angel waitlist management
          */
-        waitlistManagement?: boolean | null;
+        waitlist?: boolean | null;
         /**
          * Venue-specific cancellation policy for Guardian Angel to communicate
          */
-        cancellationPolicy?: string | null;
+        cancelPolicy?: string | null;
       };
     };
-    paymentProcessing?: {
-      acceptsPayments?: boolean | null;
+    payment?: {
+      accepts?: boolean | null;
       /**
        * Stripe Connect account ID for this venue
        */
       stripeAccountId?: string | null;
-      acceptedPaymentMethods?:
+      methods?:
         | {
-            method?: ('credit_card' | 'debit_card' | 'ach' | 'cash' | 'check' | 'insurance') | null;
+            type?: ('credit_card' | 'debit_card' | 'ach' | 'cash' | 'check' | 'insurance') | null;
             id?: string | null;
           }[]
         | null;
@@ -3636,11 +3528,11 @@ export interface Venue {
   };
   analytics?: {
     enableAnalytics?: boolean | null;
-    performanceMetrics?: {
+    metrics?: {
       /**
        * Average customer rating
        */
-      averageRating?: number | null;
+      avgRating?: number | null;
       /**
        * Total number of reviews
        */
@@ -3652,7 +3544,7 @@ export interface Venue {
       /**
        * Appointments this month
        */
-      appointmentVolume?: number | null;
+      appointments?: number | null;
     };
   };
   guardianAngel?: {
@@ -3660,12 +3552,12 @@ export interface Venue {
      * Guardian Angel assigned to this venue
      */
     assignedAngel?: (number | null) | BusinessAgent;
-    angelCustomization?: {
+    custom?: {
       /**
        * Venue-specific greeting message
        */
-      venueSpecificGreeting?: string | null;
-      venueSpecificServices?:
+      greeting?: string | null;
+      services?:
         | {
             service?: string | null;
             description?: string | null;
@@ -3787,12 +3679,12 @@ export interface BusinessAgent {
         }[]
       | null;
   };
-  operationalSettings?: {
+  ops?: {
     /**
      * Whether this spirit is actively responding to customers
      */
     isActive?: boolean | null;
-    operatingHours?: {
+    hours?: {
       timezone?: string | null;
       schedule?:
         | {
@@ -3816,7 +3708,7 @@ export interface BusinessAgent {
         }[]
       | null;
   };
-  aiIntegration?: {
+  ai?: {
     /**
      * Base system prompt that defines this spirit for AI interactions
      */
@@ -3825,13 +3717,13 @@ export interface BusinessAgent {
      * Additional context instructions for AI responses
      */
     contextInstructions?: string | null;
-    responseStyle?: {
+    style?: {
       /**
        * Maximum length for AI responses (in characters)
        */
       maxResponseLength?: number | null;
       includeEmojis?: boolean | null;
-      formalityLevel?: ('very_casual' | 'casual' | 'semi_formal' | 'formal' | 'very_formal') | null;
+      formality?: ('very_casual' | 'casual' | 'semi_formal' | 'formal' | 'very_formal') | null;
     };
   };
   /**
@@ -3875,13 +3767,13 @@ export interface BusinessAgent {
   /**
    * Specialized capabilities for serving vulnerable populations
    */
-  humanitarianCapabilities?: {
-    legalResearch?: {
+  humanitarian?: {
+    legal?: {
       /**
        * Enable case research and legal document analysis
        */
       enabled?: boolean | null;
-      accessibleDatabases?: ('court_records' | 'precedents' | 'appeals' | 'innocence' | 'reform')[] | null;
+      databases?: ('court_records' | 'precedents' | 'appeals' | 'innocence' | 'reform')[] | null;
       /**
        * Ethical boundaries and privacy protections for legal research
        */
@@ -3900,7 +3792,7 @@ export interface BusinessAgent {
        */
       positivityBias?: ('balanced' | 'hopeful' | 'solutions' | 'inspiring') | null;
     };
-    resourceOrdering?: {
+    resources?: {
       /**
        * Enable ordering books, supplies, and resources
        */
@@ -3908,10 +3800,10 @@ export interface BusinessAgent {
       /**
        * Pre-approved vendors for resource procurement
        */
-      approvedVendors?:
+      vendors?:
         | {
-            vendorName: string;
-            vendorType?: ('books' | 'education' | 'legal' | 'care' | 'communication') | null;
+            name: string;
+            type?: ('books' | 'education' | 'legal' | 'care' | 'communication') | null;
             /**
              * Monthly spending limit in USD
              */
@@ -3924,12 +3816,12 @@ export interface BusinessAgent {
        */
       autoApprovalLimit?: number | null;
     };
-    avatarRepresentation?: {
+    avatar?: {
       /**
        * Act as digital avatar when person cannot interact
        */
       enabled?: boolean | null;
-      representationScope?: ('family' | 'legal' | 'education' | 'social' | 'employment' | 'housing')[] | null;
+      scope?: ('family' | 'legal' | 'education' | 'social' | 'employment' | 'housing')[] | null;
       /**
        * How the agent should communicate on behalf of the person
        */
@@ -4207,132 +4099,44 @@ export interface AiGenerationQueue {
   createdAt: string;
 }
 /**
+ * Job queue for background processing
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "channels".
+ * via the `definition` "job-queue".
  */
-export interface Channel {
+export interface JobQueue {
   id: number;
-  tenantId: string;
-  guardianAngelId?: string | null;
-  name: string;
-  description?: string | null;
-  channelType:
-    | 'photo_analysis'
-    | 'document_processing'
-    | 'data_collection'
-    | 'monitoring'
-    | 'intelligence_gathering'
-    | 'economic_analysis';
-  reportType:
-    | 'mileage_log'
-    | 'collection_inventory'
-    | 'business_inventory'
-    | 'equipment_status'
-    | 'asset_tracking'
-    | 'quality_control'
-    | 'maintenance_log'
-    | 'customer_interaction'
-    | 'general';
-  feedConfiguration?: {
-    feedSource?:
-      | ('google_photos' | 'google_drive' | 'onedrive' | 'dropbox' | 'amazon_s3' | 'manual_upload' | 'api_webhook')
-      | null;
-    /**
-     * Source-specific configuration (OAuth tokens, folder paths, etc.)
-     */
-    feedSettings?:
-      | {
-          [k: string]: unknown;
-        }
-      | unknown[]
-      | string
-      | number
-      | boolean
-      | null;
-    /**
-     * How often to check for new content (minutes)
-     */
-    pollingInterval?: number | null;
-    filters?: {
-      fileTypes?:
-        | {
-            type?: string | null;
-            id?: string | null;
-          }[]
-        | null;
-      keywords?:
-        | {
-            keyword?: string | null;
-            id?: string | null;
-          }[]
-        | null;
-      dateRange?: {
-        from?: string | null;
-        to?: string | null;
-      };
-    };
-  };
-  phyleEconomics?: {
-    phyleAffiliation?:
-      | (
-          | 'collector_phyle'
-          | 'logistics_phyle'
-          | 'analyst_phyle'
-          | 'maintenance_phyle'
-          | 'quality_phyle'
-          | 'customer_service_phyle'
-          | 'independent_agent'
-        )
-      | null;
-    economicModel?: {
-      /**
-       * Fee per item processed (in internal currency)
-       */
-      processingFee?: number | null;
-      /**
-       * Bonus for high accuracy/quality
-       */
-      accuracyBonus?: number | null;
-      /**
-       * Bonus for fast processing
-       */
-      speedBonus?: number | null;
-      volumeDiscounts?:
-        | {
-            threshold?: number | null;
-            discount?: number | null;
-            id?: string | null;
-          }[]
-        | null;
-      revenueSharingModel?:
-        | ('fixed_fee' | 'percentage_split' | 'performance_based' | 'subscription' | 'phyle_collective')
-        | null;
-    };
-    economicStats?: {
-      totalEarned?: number | null;
-      itemsProcessed?: number | null;
-      accuracyScore?: number | null;
-      phyleRank?: number | null;
-      reputation?: number | null;
-    };
-  };
-  processingRules?: {
-    autoProcessing?: boolean | null;
-    requiresHumanReview?: boolean | null;
-    confidenceThreshold?: number | null;
-    customPrompts?:
-      | {
-          trigger?: string | null;
-          prompt?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    outputFormat?: ('json' | 'csv' | 'pdf' | 'excel') | null;
-  };
-  status?: ('active' | 'paused' | 'maintenance' | 'deprecated') | null;
-  lastProcessed?: string | null;
-  createdAt: string;
+  tenant: number | Tenant;
+  jobType: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  priority?: number | null;
+  maxAttempts?: number | null;
+  scheduledFor?: string | null;
+  attempts?: number | null;
+  startedAt?: string | null;
+  processedAt?: string | null;
+  completedAt?: string | null;
+  result?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  error?: string | null;
   updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5148,6 +4952,10 @@ export interface PayloadLockedDocument {
         value: number | AiGenerationQueue;
       } | null)
     | ({
+        relationTo: 'job-queue';
+        value: number | JobQueue;
+      } | null)
+    | ({
         relationTo: 'channels';
         value: number | Channel;
       } | null)
@@ -5317,6 +5125,14 @@ export interface TenantsSelect<T extends boolean = true> {
         maxProducts?: T;
         maxStorage?: T;
       };
+  jsonData?: T;
+  _migrationStatus?:
+    | T
+    | {
+        jsonMigrated?: T;
+        migratedAt?: T;
+        migrationVersion?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -5374,6 +5190,14 @@ export interface UsersSelect<T extends boolean = true> {
       };
   timezone?: T;
   theme?: T;
+  preferences?: T;
+  _migrationStatus?:
+    | T
+    | {
+        jsonMigrated?: T;
+        migratedAt?: T;
+        migrationVersion?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -5619,6 +5443,18 @@ export interface ContactsSelect<T extends boolean = true> {
  * via the `definition` "messages_select".
  */
 export interface MessagesSelect<T extends boolean = true> {
+  content?: T;
+  conversationContext?: T;
+  businessIntelligence?: T;
+  sender?: T;
+  space?: T;
+  channel?: T;
+  messageType?: T;
+  priority?: T;
+  readBy?: T;
+  reactions?: T;
+  threadId?: T;
+  replyToId?: T;
   atProtocol?:
     | T
     | {
@@ -5627,96 +5463,7 @@ export interface MessagesSelect<T extends boolean = true> {
         uri?: T;
         cid?: T;
       };
-  author?: T;
-  space?: T;
-  channel?: T;
-  tenant?: T;
-  content?: T;
-  messageType?: T;
-  widgetData?:
-    | T
-    | {
-        widgetType?: T;
-        widgetTitle?: T;
-        widgetData?: T;
-        isInteractive?: T;
-        allowedRoles?: T;
-        expiresAt?: T;
-        responses?: T;
-      };
-  parentMessage?: T;
-  threadReplies?: T;
   attachments?: T;
-  mentions?: T;
-  reactions?:
-    | T
-    | {
-        emoji?: T;
-        users?: T;
-        count?: T;
-        id?: T;
-      };
-  isEdited?: T;
-  editHistory?:
-    | T
-    | {
-        content?: T;
-        editedAt?: T;
-        editedBy?: T;
-        id?: T;
-      };
-  isDeleted?: T;
-  deletedBy?: T;
-  deletedAt?: T;
-  timestamp?: T;
-  metadata?: T;
-  businessContext?:
-    | T
-    | {
-        department?: T;
-        workflow?: T;
-        customerJourney?: T;
-        integrationSource?: T;
-        priority?: T;
-      };
-  knowledge?:
-    | T
-    | {
-        searchable?: T;
-        category?: T;
-        tags?: T;
-        embedding?: T;
-      };
-  thread?: T;
-  threadRoot?: T;
-  embeds?:
-    | T
-    | {
-        media?: T;
-        links?:
-          | T
-          | {
-              url?: T;
-              title?: T;
-              description?: T;
-              id?: T;
-            };
-      };
-  federation?:
-    | T
-    | {
-        discoverable?: T;
-        crossPostTo?: T;
-        audience?: T;
-      };
-  aiAgent?:
-    | T
-    | {
-        ceoAnalysis?: T;
-        suggestedActions?: T;
-        pipedreamIndex?: T;
-      };
-  langs?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -5778,51 +5525,19 @@ export interface SpacesSelect<T extends boolean = true> {
               minimumTip?: T;
             };
         merchantAccount?: T;
-        revenueShare?:
-          | T
-          | {
-              agreementType?: T;
-              platformFee?: T;
-              terms?:
-                | T
-                | {
-                    contractId?: T;
-                    effectiveDate?: T;
-                    reviewDate?: T;
-                    volumeTiers?:
-                      | T
-                      | {
-                          monthlyRevenue?: T;
-                          feePercentage?: T;
-                          id?: T;
-                        };
-                    baseFee?: T;
-                    bonusThresholds?:
-                      | T
-                      | {
-                          metric?: T;
-                          threshold?: T;
-                          feeReduction?: T;
-                          id?: T;
-                        };
-                    aiOptimization?:
-                      | T
-                      | {
-                          enabled?: T;
-                          algorithmVersion?: T;
-                          optimizationFactors?: T;
-                          feeRange?:
-                            | T
-                            | {
-                                minimum?: T;
-                                maximum?: T;
-                              };
-                          encodedParameters?: T;
-                        };
-                  };
-              processingFee?: T;
-              calculatedFee?: T;
-            };
+        revenueAgreementType?: T;
+        revenuePlatformFee?: T;
+        revenueContractId?: T;
+        revenueEffectiveDate?: T;
+        revenueReviewDate?: T;
+        aiOptEnabled?: T;
+        aiOptVersion?: T;
+        aiOptFactors?: T;
+        aiOptFeeMin?: T;
+        aiOptFeeMax?: T;
+        aiOptParams?: T;
+        revenueProcessingFee?: T;
+        revenueCalculatedFee?: T;
       };
   integrations?:
     | T
@@ -5881,6 +5596,14 @@ export interface SpacesSelect<T extends boolean = true> {
         messageCount?: T;
         lastActivity?: T;
         engagementScore?: T;
+      };
+  data?: T;
+  _migrationStatus?:
+    | T
+    | {
+        jsonMigrated?: T;
+        migratedAt?: T;
+        migrationVersion?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -6649,28 +6372,28 @@ export interface OrganizationsSelect<T extends boolean = true> {
               email?: T;
               phone?: T;
             };
-        revenueSharing?:
+        sharing?:
           | T
           | {
-              organizationRate?: T;
-              locationRate?: T;
-              volumeDiscounts?:
+              orgRate?: T;
+              locRate?: T;
+              discounts?:
                 | T
                 | {
-                    minimumLocations?: T;
-                    discountPercent?: T;
+                    minLocs?: T;
+                    percent?: T;
                     id?: T;
                   };
             };
       };
-  operationalSettings?:
+  opsSettings?:
     | T
     | {
         timezone?: T;
-        businessHours?:
+        hours?:
           | T
           | {
-              defaultSchedule?:
+              schedule?:
                 | T
                 | {
                     dayOfWeek?: T;
@@ -6689,7 +6412,7 @@ export interface OrganizationsSelect<T extends boolean = true> {
               emergencyContact?: T;
             };
       };
-  integrationSettings?:
+  integration?:
     | T
     | {
         websites?:
@@ -6709,12 +6432,12 @@ export interface OrganizationsSelect<T extends boolean = true> {
               webhookUrl?: T;
             };
       };
-  analyticsSettings?:
+  analytics?:
     | T
     | {
-        enableAnalytics?: T;
-        reportingFrequency?: T;
-        reportRecipients?:
+        enabled?: T;
+        frequency?: T;
+        recipients?:
           | T
           | {
               email?: T;
@@ -6854,26 +6577,26 @@ export interface VenuesSelect<T extends boolean = true> {
           | {
               externalBookingUrl?: T;
               bookingSystemType?: T;
-              inquickerConfig?:
+              inquicker?:
                 | T
                 | {
                     locationId?: T;
                     apiEndpoint?: T;
-                    enableRealTimeSync?: T;
-                    guardianAngelBooking?: T;
-                    waitlistManagement?: T;
-                    cancellationPolicy?: T;
+                    realTimeSync?: T;
+                    angelBooking?: T;
+                    waitlist?: T;
+                    cancelPolicy?: T;
                   };
             };
-        paymentProcessing?:
+        payment?:
           | T
           | {
-              acceptsPayments?: T;
+              accepts?: T;
               stripeAccountId?: T;
-              acceptedPaymentMethods?:
+              methods?:
                 | T
                 | {
-                    method?: T;
+                    type?: T;
                     id?: T;
                   };
             };
@@ -6882,24 +6605,24 @@ export interface VenuesSelect<T extends boolean = true> {
     | T
     | {
         enableAnalytics?: T;
-        performanceMetrics?:
+        metrics?:
           | T
           | {
-              averageRating?: T;
+              avgRating?: T;
               totalReviews?: T;
               monthlyRevenue?: T;
-              appointmentVolume?: T;
+              appointments?: T;
             };
       };
   guardianAngel?:
     | T
     | {
         assignedAngel?: T;
-        angelCustomization?:
+        custom?:
           | T
           | {
-              venueSpecificGreeting?: T;
-              venueSpecificServices?:
+              greeting?: T;
+              services?:
                 | T
                 | {
                     service?: T;
@@ -6963,11 +6686,11 @@ export interface BusinessAgentsSelect<T extends boolean = true> {
               id?: T;
             };
       };
-  operationalSettings?:
+  ops?:
     | T
     | {
         isActive?: T;
-        operatingHours?:
+        hours?:
           | T
           | {
               timezone?: T;
@@ -6988,17 +6711,17 @@ export interface BusinessAgentsSelect<T extends boolean = true> {
               id?: T;
             };
       };
-  aiIntegration?:
+  ai?:
     | T
     | {
         systemPrompt?: T;
         contextInstructions?: T;
-        responseStyle?:
+        style?:
           | T
           | {
               maxResponseLength?: T;
               includeEmojis?: T;
-              formalityLevel?: T;
+              formality?: T;
             };
       };
   analytics?:
@@ -7010,14 +6733,14 @@ export interface BusinessAgentsSelect<T extends boolean = true> {
         lastInteraction?: T;
       };
   agentType?: T;
-  humanitarianCapabilities?:
+  humanitarian?:
     | T
     | {
-        legalResearch?:
+        legal?:
           | T
           | {
               enabled?: T;
-              accessibleDatabases?: T;
+              databases?: T;
               ethicalGuidelines?: T;
             };
         newsCuration?:
@@ -7027,25 +6750,25 @@ export interface BusinessAgentsSelect<T extends boolean = true> {
               contentFilters?: T;
               positivityBias?: T;
             };
-        resourceOrdering?:
+        resources?:
           | T
           | {
               enabled?: T;
-              approvedVendors?:
+              vendors?:
                 | T
                 | {
-                    vendorName?: T;
-                    vendorType?: T;
+                    name?: T;
+                    type?: T;
                     monthlyBudget?: T;
                     id?: T;
                   };
               autoApprovalLimit?: T;
             };
-        avatarRepresentation?:
+        avatar?:
           | T
           | {
               enabled?: T;
-              representationScope?: T;
+              scope?: T;
               communicationStyle?: T;
               consentBoundaries?: T;
             };
@@ -7170,6 +6893,27 @@ export interface AiGenerationQueueSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "job-queue_select".
+ */
+export interface JobQueueSelect<T extends boolean = true> {
+  tenant?: T;
+  jobType?: T;
+  data?: T;
+  status?: T;
+  priority?: T;
+  maxAttempts?: T;
+  scheduledFor?: T;
+  attempts?: T;
+  startedAt?: T;
+  processedAt?: T;
+  completedAt?: T;
+  result?: T;
+  error?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "channels_select".
  */
 export interface ChannelsSelect<T extends boolean = true> {
@@ -7208,11 +6952,11 @@ export interface ChannelsSelect<T extends boolean = true> {
                   };
             };
       };
-  phyleEconomics?:
+  economics?:
     | T
     | {
         phyleAffiliation?: T;
-        economicModel?:
+        model?:
           | T
           | {
               processingFee?: T;
@@ -7225,9 +6969,9 @@ export interface ChannelsSelect<T extends boolean = true> {
                     discount?: T;
                     id?: T;
                   };
-              revenueSharingModel?: T;
+              sharing?: T;
             };
-        economicStats?:
+        stats?:
           | T
           | {
               totalEarned?: T;

@@ -290,35 +290,24 @@ Return JSON with this structure:
     await payload.create({
       collection: 'messages',
       data: {
-        atProtocol: {
-          type: 'app.angel.inventory',
-          did: `did:angel:inventory:${Date.now()}`,
-          uri: `at://angel.os/inventory/${context.spaceId}`,
-          cid: `cid:inventory:${Date.now()}`
-        },
-        content,
-        messageType: 'system',
-        space: parseInt(context.spaceId),
-        channel: 'inventory',
-        author: parseInt(context.userId),
-        timestamp: new Date().toISOString(),
-        businessContext: {
-          department: 'operations',
-          workflow: 'fulfillment',
-          priority: updateResults.conflicts.length > 0 ? 'high' : 'normal'
-        },
-        metadata: {
-          inventoryUpdate: {
+        content: {
+          type: 'system',
+          text: `📦 Inventory Analysis: ${updateResults.updated.length > 0 ? 'Updated' : 'Processed'}`,
+          metadata: {
             updatedProducts: updateResults.updated.length,
             conflictsCount: updateResults.conflicts.length,
             autoUpdate: true,
             timestamp: new Date().toISOString()
           }
         },
-        knowledge: {
-          searchable: true,
-          category: 'procedure',
-          tags: ['inventory', 'automation', 'photo-analysis']
+        messageType: 'intelligence',
+        space: parseInt(context.spaceId),
+        sender: parseInt(context.userId),
+        businessIntelligence: {
+          department: 'inventory',
+          workflow: 'analysis',
+          priority: updateResults.conflicts.length > 0 ? 'high' : 'normal',
+          analysisData: updateResults
         }
       }
     })

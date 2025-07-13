@@ -59,9 +59,11 @@ export class BusinessAgent {
   }
 
   // Enhanced message analysis with content management context
-  async analyzeMessage(message: Pick<Message, 'id' | 'content' | 'messageType' | 'tenant' | 'author' | 'createdAt' | 'updatedAt'>): Promise<MessageAnalysis> {
+  async analyzeMessage(message: Pick<Message, 'id' | 'content' | 'messageType' | 'space' | 'sender' | 'createdAt' | 'updatedAt'>): Promise<MessageAnalysis> {
     try {
-      const content = message.content?.toLowerCase() || ''
+      const content = typeof message.content === 'object' && message.content ?
+        (message.content as any).text || JSON.stringify(message.content) :
+        message.content?.toString() || ''
 
       // Enhanced intent detection including content management
       let intent: MessageAnalysis['intent'] = 'general'
@@ -215,7 +217,7 @@ export class BusinessAgent {
   }
 
   // Process a message and potentially create AI response (for webhook usage)
-  async processMessage(message: Pick<Message, 'id' | 'content' | 'messageType' | 'tenant' | 'author' | 'createdAt' | 'updatedAt'>): Promise<MessageAnalysis> {
+  async processMessage(message: Pick<Message, 'id' | 'content' | 'messageType' | 'space' | 'sender' | 'createdAt' | 'updatedAt'>): Promise<MessageAnalysis> {
     try {
       const analysis = await this.analyzeMessage(message)
 
@@ -1025,7 +1027,7 @@ Response:`
   }
 
   // Create an AI response message in the Messages collection
-  private async createResponseMessage(originalMessage: Pick<Message, 'id' | 'content' | 'messageType' | 'tenant' | 'author' | 'createdAt' | 'updatedAt'>, analysis: MessageAnalysis): Promise<void> {
+  private async createResponseMessage(originalMessage: Pick<Message, 'id' | 'content' | 'messageType' | 'space' | 'sender' | 'createdAt' | 'updatedAt'>, analysis: MessageAnalysis): Promise<void> {
     try {
       const payload = await getPayload({ config: configPromise })
 
@@ -1054,27 +1056,21 @@ Response:`
         collection: 'messages',
         data: {
           content: responseContent,
-          messageType: 'ai_agent',
-          tenant: this.tenantIdNumber,
-          author: originalMessage.author,
-          space: 1, // Default space - could be made configurable
-          timestamp: new Date().toISOString(),
+          messageType: 'leo',
+          space: originalMessage.space, // Use the space from the original message
+          sender: originalMessage.sender, // Changed from author to sender
           atProtocol: {
             type: 'co.kendev.spaces.ai_response',
             did: `did:plc:${this.tenantId}-ai-agent`,
           },
-          metadata: {
+          businessIntelligence: {
             aiAgent: {
               respondingTo: originalMessage.id,
               analysis: analysis,
               personality: this.personality,
-              confidence: 0.8
+              capabilities: this.capabilities,
+              timestamp: new Date().toISOString(),
             }
-          },
-          businessContext: {
-            department: 'support',
-            workflow: 'support',
-            priority: analysis.priority as 'low' | 'normal' | 'high' | 'urgent'
           }
         }
       })

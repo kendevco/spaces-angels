@@ -338,7 +338,7 @@ export const Products: CollectionConfig = {
       name: 'productType',
       type: 'select',
       required: true,
-      defaultValue: 'service',
+      defaultValue: 'business_service',
       options: [
         { label: 'AI-Generated Print on Demand', value: 'ai_print_demand' },
         { label: 'One-on-One Consultation', value: 'consultation_solo' },
@@ -466,7 +466,7 @@ export const Products: CollectionConfig = {
         },
       ],
       admin: {
-        condition: (data) => ['digital', 'course'].includes(data.productType),
+        condition: (data) => ['digital_download', 'course_training'].includes(data.productType),
         description: 'Digital files delivered after purchase',
       },
     },
@@ -507,7 +507,7 @@ export const Products: CollectionConfig = {
         },
       ],
       admin: {
-        condition: (data) => ['service', 'experience', 'consultation', 'course'].includes(data.productType),
+        condition: (data) => ['business_service', 'group_event', 'consultation_solo', 'course_training'].includes(data.productType),
       },
     },
     // Rich Content Description

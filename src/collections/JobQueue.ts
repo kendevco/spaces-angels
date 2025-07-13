@@ -1,8 +1,15 @@
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
+
 import { authenticated } from '../access/authenticated'
 
 export const JobQueue: CollectionConfig = {
   slug: 'job-queue',
+  admin: {
+    useAsTitle: 'id',
+    defaultColumns: ['jobType', 'status', 'priority', 'createdAt'],
+    group: 'System',
+    description: 'Job queue for background processing',
+  },
   access: {
     read: authenticated,
     create: authenticated,
@@ -17,15 +24,13 @@ export const JobQueue: CollectionConfig = {
       required: true,
     },
     {
-      name: 'type',
-      type: 'select',
-      options: [
-        { label: 'AI Generation', value: 'ai_generation' },
-        { label: 'Photo Processing', value: 'photo_processing' },
-        { label: 'Social Media', value: 'social_media' },
-        { label: 'Revenue Analytics', value: 'revenue_analytics' },
-        { label: 'Email Processing', value: 'email_processing' },
-      ],
+      name: 'jobType',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'data',
+      type: 'json',
       required: true,
     },
     {
@@ -36,43 +41,12 @@ export const JobQueue: CollectionConfig = {
         { label: 'Processing', value: 'processing' },
         { label: 'Completed', value: 'completed' },
         { label: 'Failed', value: 'failed' },
-        { label: 'Cancelled', value: 'cancelled' },
       ],
       defaultValue: 'pending',
       required: true,
     },
     {
       name: 'priority',
-      type: 'number',
-      defaultValue: 0,
-      admin: {
-        description: 'Higher numbers = higher priority',
-      },
-    },
-    {
-      name: 'payload',
-      type: 'json',
-      required: true,
-      admin: {
-        description: 'Job data and parameters',
-      },
-    },
-    {
-      name: 'result',
-      type: 'json',
-      admin: {
-        description: 'Job result data',
-      },
-    },
-    {
-      name: 'error',
-      type: 'textarea',
-      admin: {
-        description: 'Error message if job failed',
-      },
-    },
-    {
-      name: 'attempts',
       type: 'number',
       defaultValue: 0,
     },
@@ -84,9 +58,15 @@ export const JobQueue: CollectionConfig = {
     {
       name: 'scheduledFor',
       type: 'date',
-      admin: {
-        description: 'When to process this job (leave empty for immediate)',
-      },
+    },
+    {
+      name: 'attempts',
+      type: 'number',
+      defaultValue: 0,
+    },
+    {
+      name: 'startedAt',
+      type: 'date',
     },
     {
       name: 'processedAt',
@@ -96,18 +76,14 @@ export const JobQueue: CollectionConfig = {
       name: 'completedAt',
       type: 'date',
     },
+    {
+      name: 'result',
+      type: 'json',
+    },
+    {
+      name: 'error',
+      type: 'text',
+    },
   ],
   timestamps: true,
-  hooks: {
-    beforeChange: [
-      ({ data, operation }) => {
-        if (operation === 'update' && data.status === 'processing' && !data.processedAt) {
-          data.processedAt = new Date()
-        }
-        if (operation === 'update' && data.status === 'completed' && !data.completedAt) {
-          data.completedAt = new Date()
-        }
-      },
-    ],
-  },
 } 

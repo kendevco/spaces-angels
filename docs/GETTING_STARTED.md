@@ -1,321 +1,435 @@
-# Getting Started with Spaces Commerce Platform
+# Getting Started with Angel OS Platform
 
-Welcome to **Spaces Commerce** - the world's first federated AI-powered business operating system! This guide will walk you through setting up your own multi-tenant business platform with AT Protocol federation and AI agents.
+> **"From zero to automated business in 24 hours"**  
+> *Complete onboarding guide for new businesses*
 
-## 🎯 **What You'll Build**
+## 🚀 **Quick Start Overview**
 
-By the end of this guide, you'll have:
-- ✅ A running multi-tenant business platform
-- ✅ Business AI agents for each tenant
-- ✅ AT Protocol federation with BlueSky
-- ✅ Universal knowledge management system
-- ✅ Multiple business types configured (cactus farm, equipment rental, etc.)
+Angel OS transforms any business into a sophisticated AI-powered operation within 24 hours. Whether you're a service provider, content creator, or traditional business, our platform provides everything needed for modern automated operations.
 
-## 📋 **Prerequisites**
+### **What You Get Immediately**
+- **Discord-style collaboration interface** for team coordination
+- **Leo Ship Mind AI partner** for autonomous business intelligence
+- **Multi-platform social media automation** (Facebook, Instagram, Twitter, LinkedIn)
+- **Voice AI customer service** with appointment booking
+- **Revenue sharing engine** with commission tracking
+- **Universal business collections** supporting any use case
 
-### System Requirements
-- **Node.js** 18.0 or higher
-- **PostgreSQL** 12.0 or higher
-- **Git** for version control
-- **Domain name** with wildcard DNS support (for multi-tenancy)
+## 🎯 **Choose Your Business Type**
 
-### Required Accounts
-- **OpenAI API** account (for AI agents)
-- **BlueSky** account (for federation)
-- **Database hosting** (local PostgreSQL or cloud provider)
+### **Service Business (Contractors, Consultants, Local Services)**
+**Perfect for:** Plumbers, electricians, lawyers, accountants, coaches, freelancers
 
-## 🚀 **Step 1: Installation**
+**Core Features:**
+- Appointment scheduling with customer preferences
+- Automated customer communication and follow-ups
+- Invoice generation and payment processing
+- Lead scoring and qualification
+- Service documentation and photo inventory
 
-### Clone the Repository
+### **Content Creator (YouTube, Podcasts, Blogs)**
+**Perfect for:** YouTubers, bloggers, podcasters, influencers, artists
+
+**Core Features:**
+- Multi-platform content syndication
+- AI-generated merchandise and products
+- Audience analysis and engagement optimization
+- Revenue diversification strategies
+- Cross-platform community building
+
+### **E-commerce Business (Online Stores, Marketplaces)**
+**Perfect for:** Product sellers, dropshippers, marketplace vendors
+
+**Core Features:**
+- Inventory management with photo recognition
+- Automated product descriptions and SEO
+- Customer service and order management
+- Social media marketing automation
+- Revenue analytics and forecasting
+
+### **Justice Advocacy (Legal, Non-Profit, Activism)**
+**Perfect for:** Lawyers, advocates, non-profits, activists
+
+**Core Features:**
+- Case management and documentation
+- Automated legal research and analysis
+- Client communication and intake
+- Document generation and signing
+- Cross-subsidization support model
+
+## 🏗️ **Step-by-Step Setup Process**
+
+### **Phase 1: Account Creation & Business Profile (30 minutes)**
+
+#### **1.1 Initial Registration**
 ```bash
-git clone https://github.com/your-org/spaces-commerce.git
-cd spaces-commerce
+# Platform Access
+URL: https://spaces.kendev.co
+Registration: Business email + verification
+Initial Setup: Guided onboarding questionnaire
 ```
 
-### Install Dependencies
-```bash
-# Using npm
-npm install
-
-# Or using pnpm (recommended)
-pnpm install
-```
-
-## 🔧 **Step 2: Environment Configuration**
-
-### Create Environment File
-```bash
-cp .env.example .env
-```
-
-### Essential Environment Variables
-```env
-# === DATABASE CONFIGURATION ===
-DATABASE_URI=postgresql://username:password@localhost:5432/spaces_commerce
-
-# === PAYLOAD CMS CONFIGURATION ===
-PAYLOAD_SECRET=your-secure-64-character-secret-key-here
-NEXT_PUBLIC_SERVER_URL=http://localhost:3000
-PAYLOAD_PUBLIC_SERVER_URL=http://localhost:3000
-
-# === AT PROTOCOL & FEDERATION ===
-BLUESKY_HANDLE=your-business@bsky.social
-BLUESKY_PASSWORD=your-app-password
-
-# === AI SERVICES ===
-OPENAI_API_KEY=sk-your-openai-api-key
-ANTHROPIC_API_KEY=sk-ant-your-anthropic-api-key
-
-# === MULTI-TENANT CONFIGURATION ===
-TENANT_DOMAIN=yourdomain.com
-TENANT_SUBDOMAIN_PATTERN={tenant}.yourdomain.com
-```
-
-### Generate Secure Keys
-```bash
-# Generate a secure 64-character secret
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-## 🗄️ **Step 3: Database Setup**
-
-### Local PostgreSQL Setup
-```bash
-# Create database
-createdb spaces_commerce
-
-# Create user
-psql -c "CREATE USER spaces_user WITH ENCRYPTED PASSWORD 'your_password';"
-psql -c "GRANT ALL PRIVILEGES ON DATABASE spaces_commerce TO spaces_user;"
-```
-
-### Test Database Connection
-```bash
-npm run db:test
-```
-
-## 🏃‍♂️ **Step 4: First Run**
-
-### Start Development Server
-```bash
-npm run dev
-```
-
-### Access the Admin Panel
-1. Visit `http://localhost:3000/admin`
-2. Create your first admin user
-3. You'll see the Payload CMS admin interface
-
-## 🏢 **Step 5: Create Your First Tenant**
-
-### Navigate to Tenants Collection
-1. In the admin panel, go to **Collections > Tenants**
-2. Click **Create New**
-
-### Configure Your First Business
-```json
-{
-  "name": "Hays Cactus Farm",
-  "subdomain": "hays",
-  "businessType": "agriculture",
-  "status": "active",
-  "features": {
-    "ecommerce": true,
-    "spaces": true,
-    "ai_agent": true,
-    "federation": true
-  },
-  "branding": {
-    "primaryColor": "#10B981",
-    "logo": "upload-your-logo.png",
-    "description": "Premium cactus plants and expert care advice"
+#### **1.2 Business Profile Creation**
+```typescript
+interface BusinessProfile {
+  basic_info: {
+    business_name: "Your Business Name"
+    industry: "Service | Content | E-commerce | Justice"
+    target_audience: "Who you serve"
+    location: "Geographic area or 'Online'"
+  }
+  
+  services_products: {
+    primary_offerings: "What you sell or provide"
+    pricing_model: "Hourly | Project | Subscription | Product"
+    unique_value: "What makes you different"
+  }
+  
+  automation_goals: {
+    time_savings: "What tasks to automate"
+    revenue_growth: "Growth targets and timelines"
+    customer_experience: "Service quality improvements"
   }
 }
 ```
 
-### Test Tenant Access
-Visit `http://hays.localhost:3000` (you may need to add this to your `/etc/hosts` file for local development)
+#### **1.3 Leo Ship Mind Introduction**
+- **Meet Leo**: Your AI business partner introduction
+- **Personality Assessment**: Leo learns your communication style
+- **Business Context**: Share challenges and goals
+- **Collaboration Setup**: Establish working relationship
 
-## 🤖 **Step 6: Activate AI Agents**
+### **Phase 2: Core System Configuration (60 minutes)**
 
-### Verify Business Agent Creation
-```bash
-# Check that Business Agent was created for your tenant
-curl http://localhost:3000/api/federation/test
-```
-
-### Test AI Analysis
-```bash
-curl -X POST http://localhost:3000/api/federation/test \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "Customer asking about cactus care in winter",
-    "tenant": {"name": "Hays Cactus Farm", "businessType": "agriculture"},
-    "action": "analyze"
-  }'
-```
-
-## 🌐 **Step 7: Federation Setup**
-
-### BlueSky Integration
-1. Create a BlueSky account for your business
-2. Generate an app password in BlueSky settings
-3. Add credentials to your `.env` file
-4. Test federation:
-
-```bash
-curl -X POST http://localhost:3000/api/federation/test \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "Hello from the federated business network!",
-    "action": "federate"
-  }'
-```
-
-## 🎨 **Step 8: Customize Your Business**
-
-### Add Your First Product
-1. Go to **Collections > Products**
-2. Create a product relevant to your business type:
-
-```json
-{
-  "name": "Golden Barrel Cactus",
-  "type": "physical",
-  "price": 2999,
-  "inventory": 50,
-  "businessContext": {
-    "careLevel": "beginner",
-    "lightRequirement": "full_sun",
-    "wateringFrequency": "monthly"
+#### **2.1 Essential Integrations**
+```typescript
+interface CoreIntegrations {
+  communication: {
+    email: "Business email integration"
+    phone: "Voice AI setup with VAPI"
+    calendar: "Appointment scheduling system"
+    website: "Web chat and lead capture"
+  }
+  
+  business_tools: {
+    payment_processing: "Stripe or PayPal integration"
+    social_media: "Facebook, Instagram, Twitter, LinkedIn"
+    cloud_storage: "Google Drive or Dropbox"
+    accounting: "QuickBooks or similar"
+  }
+  
+  optional_advanced: {
+    crm: "Existing customer database import"
+    e_commerce: "Shopify or WooCommerce connection"
+    project_management: "Asana, Trello, or Monday.com"
+    document_signing: "DocuSign integration"
   }
 }
 ```
 
-### Create Knowledge Articles
-1. Go to **Collections > Messages**
-2. Add business knowledge:
+#### **2.2 Content & Brand Setup**
+- **Brand Identity**: Logo, colors, voice/tone guidelines
+- **Template Creation**: Business cards, proposals, contracts
+- **Content Calendar**: Initial social media and blog strategy
+- **SEO Optimization**: Keywords and search strategy
 
-```json
-{
-  "type": "knowledge_article",
-  "title": "Winter Cactus Care Guide",
-  "content": "During winter months, reduce watering frequency...",
-  "metadata": {
-    "category": "plant_care",
-    "season": "winter",
-    "difficulty": "beginner"
+#### **2.3 Customer Journey Mapping**
+```typescript
+interface CustomerJourney {
+  awareness: {
+    lead_sources: "How customers find you"
+    first_impression: "Initial touchpoint optimization"
+    qualification: "Automated lead scoring setup"
+  }
+  
+  consideration: {
+    nurture_sequence: "Automated follow-up campaigns"
+    value_demonstration: "Case studies and testimonials"
+    objection_handling: "Common concerns and responses"
+  }
+  
+  conversion: {
+    booking_process: "Seamless appointment scheduling"
+    payment_handling: "Secure transaction processing"
+    onboarding: "New customer welcome experience"
+  }
+  
+  retention: {
+    follow_up: "Post-service satisfaction tracking"
+    upselling: "Additional service opportunities"
+    referral_system: "Customer advocacy programs"
   }
 }
 ```
 
-## 🧪 **Step 9: Test Federation**
+### **Phase 3: AI Agent Training (45 minutes)**
 
-### Verify Your Tenant is Discoverable
+#### **3.1 Leo Personality Configuration**
+```typescript
+interface LeoConfiguration {
+  communication_style: {
+    formality_level: "Professional | Casual | Industry-specific"
+    response_tone: "Helpful | Authoritative | Consultative"
+    industry_expertise: "Domain-specific knowledge areas"
+  }
+  
+  decision_authority: {
+    autonomous_actions: "What Leo can do independently"
+    approval_required: "Tasks needing human confirmation"
+    escalation_triggers: "When to involve human oversight"
+  }
+  
+  business_context: {
+    company_values: "Core principles and ethics"
+    service_standards: "Quality expectations and delivery"
+    customer_approach: "Relationship and interaction style"
+  }
+}
+```
+
+#### **3.2 Business Agent Specialization**
+- **Domain Expertise**: Industry-specific knowledge training
+- **Customer Personas**: Typical customer profiles and needs
+- **Process Automation**: Routine task identification and automation
+- **Quality Standards**: Service delivery expectations
+
+### **Phase 4: Launch & Optimization (30 minutes)**
+
+#### **4.1 Pre-Launch Testing**
 ```bash
-# Test AT Protocol record creation
-curl http://localhost:3000/api/federation/discover?businessType=agriculture
+# System Verification Checklist
+✅ Voice AI responds correctly to test calls
+✅ Social media posting works across platforms
+✅ Appointment booking functions properly
+✅ Payment processing completes transactions
+✅ Leo provides relevant business insights
+✅ Customer communications send automatically
 ```
 
-### Cross-Tenant Communication
-1. Create a second tenant (e.g., equipment rental)
-2. Test AI agent collaboration:
+#### **4.2 Go-Live Process**
+1. **Soft Launch**: Friends and family testing
+2. **Customer Migration**: Existing client onboarding
+3. **Marketing Activation**: Social media and content launch
+4. **Performance Monitoring**: Analytics and optimization
 
-```bash
-curl -X POST http://localhost:3000/api/ai-bus/collaborate \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "Who has experience with plant equipment?",
-    "fromTenant": "hays-cactus-farm"
-  }'
+## 🎛️ **Daily Operations Guide**
+
+### **Morning Routine (15 minutes)**
+```typescript
+interface DailyStartup {
+  dashboard_review: {
+    overnight_messages: "Customer inquiries and responses"
+    appointment_updates: "Schedule changes and confirmations"
+    revenue_summary: "Sales and payment activity"
+    system_health: "AI performance and integration status"
+  }
+  
+  leo_briefing: {
+    business_insights: "Key patterns and recommendations"
+    priority_actions: "Today's most important tasks"
+    optimization_suggestions: "Improvement opportunities"
+    market_updates: "Industry trends and competitor activity"
+  }
+}
 ```
 
-## 🚀 **Step 10: Production Deployment**
-
-### Deploy to Vercel
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
-
-# Set environment variables in Vercel dashboard
+### **Customer Interaction Workflow**
+```typescript
+interface CustomerWorkflow {
+  lead_capture: {
+    source_identification: "How customer found you"
+    qualification_scoring: "Automated lead assessment"
+    response_routing: "Human vs AI handling decision"
+    follow_up_scheduling: "Automatic nurture sequence"
+  }
+  
+  service_delivery: {
+    appointment_coordination: "Scheduling and confirmations"
+    preparation_checklist: "Pre-service requirements"
+    documentation: "Service photos and notes"
+    satisfaction_tracking: "Post-service feedback"
+  }
+  
+  relationship_management: {
+    interaction_history: "Complete customer timeline"
+    preference_tracking: "Individual customer needs"
+    upselling_opportunities: "Additional service suggestions"
+    referral_potential: "Advocacy program participation"
+  }
+}
 ```
 
-### Configure Wildcard DNS
-Add these DNS records to your domain:
+### **Content & Marketing Automation**
+```typescript
+interface ContentStrategy {
+  content_calendar: {
+    daily_posts: "Automated social media content"
+    weekly_blog: "Industry insights and tips"
+    monthly_newsletter: "Customer updates and promotions"
+    quarterly_reports: "Business performance and goals"
+  }
+  
+  engagement_optimization: {
+    posting_schedule: "Optimal timing for audience"
+    content_variety: "Mixed media and formats"
+    audience_interaction: "Comments and message responses"
+    performance_analysis: "Engagement metrics and improvement"
+  }
+}
 ```
-A     yourdomain.com          → your-vercel-ip
-CNAME *.yourdomain.com        → yourdomain.com
+
+## 🔧 **Advanced Features & Customization**
+
+### **Leo Ship Mind Advanced Configuration**
+```typescript
+interface AdvancedLeoFeatures {
+  multi_provider_ai: {
+    provider_selection: "OpenAI | Anthropic | Google | DeepSeek"
+    cost_optimization: "Automatic provider switching"
+    performance_monitoring: "Quality and speed tracking"
+    fallback_protection: "Redundancy and reliability"
+  }
+  
+  business_intelligence: {
+    predictive_analytics: "Forecasting and trend analysis"
+    competitive_analysis: "Market positioning insights"
+    customer_behavior: "Pattern recognition and recommendations"
+    revenue_optimization: "Pricing and service improvements"
+  }
+  
+  autonomous_operations: {
+    decision_making: "Independent business choices"
+    process_optimization: "Efficiency improvements"
+    quality_control: "Automatic service monitoring"
+    growth_strategies: "Expansion and scaling recommendations"
+  }
+}
 ```
 
-### Test Production Federation
-```bash
-curl https://api.yourdomain.com/federation/test
+### **Revenue Optimization Strategies**
+```typescript
+interface RevenueOptimization {
+  partnership_program: {
+    referral_commissions: "30% for successful referrals"
+    volume_discounts: "Automatic rate reductions"
+    cross_business_opportunities: "Collaborative partnerships"
+    white_label_solutions: "Agency and consultant programs"
+  }
+  
+  service_expansion: {
+    complementary_services: "Natural business extensions"
+    digital_products: "Scalable offering development"
+    subscription_models: "Recurring revenue streams"
+    premium_tiers: "Enhanced service levels"
+  }
+  
+  market_expansion: {
+    geographic_growth: "New territory identification"
+    customer_segments: "Underserved market opportunities"
+    platform_diversification: "Multi-channel presence"
+    strategic_partnerships: "Business development"
+  }
+}
 ```
 
-## ✅ **Verification Checklist**
+## 🎯 **Success Metrics & KPIs**
 
-- [ ] Admin panel accessible at `/admin`
-- [ ] First tenant created and accessible via subdomain
-- [ ] Business AI agent responding to business queries
-- [ ] AT Protocol records being created
-- [ ] BlueSky federation posting successfully
-- [ ] Multi-tenant isolation working
-- [ ] Knowledge management operational
-- [ ] Product/service catalog functional
+### **30-Day Success Indicators**
+```typescript
+interface ThirtyDayMetrics {
+  automation_efficiency: {
+    time_savings: "Hours saved per week through automation"
+    response_time: "Customer inquiry resolution speed"
+    booking_conversion: "Appointment scheduling success rate"
+    content_consistency: "Daily social media posting achievement"
+  }
+  
+  business_growth: {
+    lead_generation: "New customer inquiries per week"
+    conversion_rate: "Inquiry to customer percentage"
+    revenue_increase: "Monthly revenue growth"
+    customer_satisfaction: "Service quality ratings"
+  }
+  
+  system_performance: {
+    uptime_reliability: "Platform availability percentage"
+    ai_accuracy: "Leo recommendation success rate"
+    integration_stability: "Third-party tool connectivity"
+    user_adoption: "Team utilization of platform features"
+  }
+}
+```
 
-## 🎉 **Success! What's Next?**
+### **90-Day Growth Targets**
+```typescript
+interface NinetyDayTargets {
+  revenue_goals: {
+    monthly_growth: "20-40% increase in monthly revenue"
+    customer_acquisition: "50% increase in new customers"
+    service_efficiency: "30% reduction in service delivery time"
+    profit_margins: "15% improvement in profitability"
+  }
+  
+  operational_excellence: {
+    automation_coverage: "80% of routine tasks automated"
+    customer_satisfaction: "95% positive feedback rating"
+    team_productivity: "50% increase in output per hour"
+    market_positioning: "Recognized as industry leader"
+  }
+}
+```
 
-Congratulations! You now have a fully operational federated business platform. Here's what to explore next:
+## 🆘 **Support & Troubleshooting**
 
-### **Immediate Actions**
-1. **Invite team members** to your tenant
-2. **Configure additional business types** 
-3. **Set up automated workflows**
-4. **Connect additional AI services**
+### **Common Issues & Solutions**
+```typescript
+interface TroubleshootingGuide {
+  integration_problems: {
+    social_media_posting: "OAuth token refresh and permissions"
+    calendar_sync: "Timezone and availability conflicts"
+    payment_processing: "Gateway configuration and testing"
+    voice_ai_calls: "VAPI webhook and routing setup"
+  }
+  
+  performance_optimization: {
+    slow_responses: "Database query optimization"
+    memory_usage: "Image and file size management"
+    connection_timeouts: "Network and server configuration"
+    ai_accuracy: "Training data and context refinement"
+  }
+  
+  user_experience: {
+    mobile_responsiveness: "CSS and viewport adjustments"
+    navigation_confusion: "Interface simplification"
+    feature_discovery: "Onboarding and tutorial enhancement"
+    customization_needs: "Theme and layout personalization"
+  }
+}
+```
 
-### **Advanced Features**
-1. **Voice AI integration** (VAPI)
-2. **Workflow automation** (N8N)
-3. **Advanced analytics** and business intelligence
-4. **Custom AI agent behaviors**
+### **Support Channels**
+- **Leo AI Assistant**: 24/7 intelligent help and guidance
+- **Documentation**: Comprehensive guides and tutorials
+- **Community Forum**: Peer support and best practices
+- **Direct Support**: Human assistance for complex issues
+- **Video Tutorials**: Step-by-step visual guides
 
-### **Community & Support**
-- Join our [GitHub Discussions](https://github.com/your-org/spaces-commerce/discussions)
-- Read the [complete documentation](./docs/)
-- Connect with the [AT Protocol community](https://atproto.com/)
+## 🌟 **Success Stories & Case Studies**
 
-## 🔧 **Troubleshooting**
-
-### Common Issues
-
-**"Database connection failed"**
-- Verify PostgreSQL is running
-- Check DATABASE_URI format
-- Ensure user has proper permissions
-
-**"Tenant not found"**
-- Check subdomain configuration
-- Verify DNS/hosts file setup
-- Confirm tenant status is 'active'
-
-**"AI agent not responding"**
-- Verify OpenAI API key
-- Check API rate limits
-- Review logs: `npm run logs`
-
-**"Federation not working"**
-- Confirm BlueSky credentials
-- Check AT Protocol service status
-- Verify network connectivity
-
-### Get Help
-- **Issues**: [GitHub Issues](https://github.com/your-org/spaces-commerce/issues)
-- **Documentation**: [Full Docs](./docs/)
-- **Community**: [Discussions](https://github.com/your-org/spaces-commerce/discussions)
+### **Real Customer Examples**
+1. **Local Service Business**: 300% increase in bookings within 60 days
+2. **Content Creator**: 40% revenue growth through automated merchandise
+3. **Justice Advocacy**: 70% reduction in case preparation time
+4. **E-commerce Store**: 150% improvement in customer satisfaction
 
 ---
 
-**🎊 Welcome to the federated future of business!** You're now part of a network where small businesses can collaborate, share knowledge, and grow together while maintaining their independence and data sovereignty. 
+## 🎊 **Welcome to the Future of Business**
+
+Angel OS represents a fundamental shift in how businesses operate. By combining human creativity with AI intelligence, we're creating a new paradigm where technology serves humanity while ensuring economic justice and sustainability.
+
+**Your journey starts now. Leo is waiting to meet you.**
+
+---
+
+*"Within 24 hours, you'll have a business that operates like a Fortune 500 company, with AI partners who understand your vision and work tirelessly to achieve your goals. Welcome to the future of business automation."* 

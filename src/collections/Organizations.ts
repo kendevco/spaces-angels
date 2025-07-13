@@ -210,11 +210,11 @@ export const Organizations: CollectionConfig = {
           ],
         },
         {
-          name: 'revenueSharing',
+          name: 'sharing',
           type: 'group',
           fields: [
             {
-              name: 'organizationRate',
+              name: 'orgRate',
               type: 'number',
               defaultValue: 2.0,
               min: 0,
@@ -225,7 +225,7 @@ export const Organizations: CollectionConfig = {
               },
             },
             {
-              name: 'locationRate',
+              name: 'locRate',
               type: 'number',
               defaultValue: 1.0,
               min: 0,
@@ -236,16 +236,16 @@ export const Organizations: CollectionConfig = {
               },
             },
             {
-              name: 'volumeDiscounts',
+              name: 'discounts',
               type: 'array',
               fields: [
                 {
-                  name: 'minimumLocations',
+                  name: 'minLocs',
                   type: 'number',
                   required: true,
                 },
                 {
-                  name: 'discountPercent',
+                  name: 'percent',
                   type: 'number',
                   required: true,
                   min: 0,
@@ -258,7 +258,7 @@ export const Organizations: CollectionConfig = {
       ],
     },
     {
-      name: 'operationalSettings',
+      name: 'opsSettings',
       type: 'group',
       label: 'Operational Settings',
       fields: [
@@ -271,11 +271,11 @@ export const Organizations: CollectionConfig = {
           },
         },
         {
-          name: 'businessHours',
+          name: 'hours',
           type: 'group',
           fields: [
             {
-              name: 'defaultSchedule',
+              name: 'schedule',
               type: 'array',
               fields: [
                 {
@@ -311,7 +311,7 @@ export const Organizations: CollectionConfig = {
       ],
     },
     {
-      name: 'integrationSettings',
+      name: 'integration',
       type: 'group',
       label: 'Platform Integration',
       fields: [
@@ -385,17 +385,17 @@ export const Organizations: CollectionConfig = {
       ],
     },
     {
-      name: 'analyticsSettings',
+      name: 'analytics',
       type: 'group',
       label: 'Analytics & Reporting',
       fields: [
         {
-          name: 'enableAnalytics',
+          name: 'enabled',
           type: 'checkbox',
           defaultValue: true,
         },
         {
-          name: 'reportingFrequency',
+          name: 'frequency',
           type: 'select',
           options: [
             { label: 'Real-time', value: 'realtime' },
@@ -406,7 +406,7 @@ export const Organizations: CollectionConfig = {
           defaultValue: 'weekly',
         },
         {
-          name: 'reportRecipients',
+          name: 'recipients',
           type: 'array',
           fields: [
             { name: 'email', type: 'email', required: true },

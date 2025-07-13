@@ -1,8 +1,11 @@
 // Angel OS Corpus Integration Service
 // Real-time Literary Wisdom Access for All AI Entities
 
+import type { Payload } from 'payload'
+import { getPayload } from 'payload'
+import configPromise from '@payload-config'
 import DCIMIntelligenceService from './DCIMIntelligenceService'
-import { IntentDetectionCatalog } from './IntentDetectionCatalog'
+// Removed IntentDetectionCatalog import to prevent server-side hooks in client context
 
 export interface LiteraryWisdomQuery {
   context: string
@@ -39,6 +42,10 @@ export interface WisdomApplication {
   humanFeedback?: string
 }
 
+/**
+ * Angel OS Corpus Service
+ * Manages the collective wisdom repository with ethical AI oversight
+ */
 export class AngelOSCorpusService {
   private dcimService: DCIMIntelligenceService
   private corpusEntities: Map<string, CorpusEntity> = new Map()

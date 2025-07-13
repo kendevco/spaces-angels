@@ -68,31 +68,33 @@ export async function POST(request: NextRequest) {
     await payload.create({
       collection: 'messages',
       data: {
-        content: `Appointment booked: ${appointment.title}`,
-        messageType: 'system_alert',
+        content: {
+          type: 'system',
+          text: `Appointment booked: ${appointment.title}`,
+          metadata: {
+            appointmentId: appointment.id,
+            type: 'booking_confirmation',
+            appointment: {
+              id: appointment.id,
+              startTime: appointment.startTime,
+              endTime: appointment.endTime,
+              meetingType: appointment.meetingType,
+              paymentRequired: appointment.payment?.required || false,
+            }
+          }
+        },
+        messageType: 'system',
         space: data.space || 1,
-        author: user.user.id,
-        channel: 'bookings',
+        sender: user.user.id,
         atProtocol: {
           type: 'co.kendev.spaces.message',
         },
-        businessContext: {
+        businessIntelligence: {
           department: 'sales',
           workflow: 'quote',
-          priority: 'normal',
           integrationSource: 'web_widget',
         },
-        metadata: {
-          appointment: {
-            id: appointment.id,
-            startTime: appointment.startTime,
-            endTime: appointment.endTime,
-            meetingType: appointment.meetingType,
-            paymentRequired: appointment.payment?.required || false,
-          }
-        },
-        timestamp: new Date().toISOString(),
-      }
+      },
     })
 
     return NextResponse.json({

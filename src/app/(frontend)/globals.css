@@ -26,27 +26,52 @@
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
 
-    --muted: 210 40% 96.1%;
+    --muted: 210 40% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 240 6% 80%;
+    --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.2rem;
+    --radius: 0.5rem;
 
-    --success: 196 52% 74%;
-    --warning: 34 89% 85%;
-    --error: 10 100% 86%;
+    /* Andrew Martin Control Panel Variables */
+    --andrew-primary: #1e40af;      /* Professional blue */
+    --andrew-secondary: #64748b;    /* Sophisticated gray */
+    --andrew-accent: #10b981;       /* Success green */
+    --andrew-background: #f8fafc;   /* Clean background */
+    --andrew-surface: #ffffff;      /* Card surfaces */
+    --andrew-text: #1e293b;         /* Primary text */
+    --andrew-text-muted: #64748b;   /* Secondary text */
+    --andrew-border: #e2e8f0;       /* Light border for cards/dividers */
+    --andrew-error: #ef4444;        /* Red for errors */
+    --andrew-warning: #f97316;      /* Orange for warnings */
+    --andrew-success: #22c55e;      /* Green for success (distinct from accent) */
+    --andrew-info: #3b82f6;         /* Blue for informational messages */
+
+    /* Typography Scale */
+    --font-display: 2.5rem;  /* 40px */
+    --font-h1: 2rem;         /* 32px */
+    --font-h2: 1.5rem;       /* 24px */
+    --font-h3: 1.25rem;      /* 20px */
+    --font-body: 1rem;       /* 16px */
+    --font-small: 0.875rem;  /* 14px */
+    --font-caption: 0.75rem; /* 12px */
+
+    /* Spacing */
+    --space-section-gap: 2rem;  /* 32px */
+    --space-card-gap: 1.5rem;   /* 24px */
+    --space-element-gap: 1rem;  /* 16px */
+    --space-tight-gap: 0.5rem;  /* 8px */
   }
 
   [data-theme='dark'] {

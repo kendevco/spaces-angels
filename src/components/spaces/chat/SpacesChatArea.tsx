@@ -175,8 +175,8 @@ export function SpacesChatArea({
               {messages.map((message, index) => {
                 const showAvatar = index === 0 ||
                   (messages[index - 1] &&
-                   (typeof messages[index - 1]?.author === 'object' ? (messages[index - 1]?.author as any)?.id : messages[index - 1]?.author) !==
-                   (typeof message.author === 'object' ? (message.author as any)?.id : message.author))
+                   (typeof messages[index - 1]?.sender === 'object' ? (messages[index - 1]?.sender as any)?.id : messages[index - 1]?.sender) !==
+                   (typeof message.sender === 'object' ? (message.sender as any)?.id : message.sender))
 
                 return (
                   <ChatMessage

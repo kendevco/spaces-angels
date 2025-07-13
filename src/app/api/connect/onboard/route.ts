@@ -3,9 +3,10 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Initialize Stripe only when we have the secret key (not during build)
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-05-28.basil' as any,
-})
+}) : null
 
 /**
  * Generate Account Onboarding Link
@@ -15,6 +16,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
  */
 export async function POST(request: NextRequest) {
   try {
+    if (!stripe) {
+      return NextResponse.json({
+        error: 'Stripe configuration not available',
+        message: 'STRIPE_SECRET_KEY is not configured'
+      }, { status: 500 })
+    }
+
     const { userId, businessInfo } = await request.json()
 
     if (!userId) {
@@ -129,6 +137,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Generate new account link
+    if (!stripe) {
+      return NextResponse.redirect(
+        new URL('/connect/error?message=Stripe not configured', process.env.NEXT_PUBLIC_SERVER_URL!)
+      )
+    }
+    
     const accountLink = await stripe.accountLinks.create({
               account: (user as any).stripeConnect?.stripeConnectAccountId,
       refresh_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/api/connect/refresh?userId=${userId}`,

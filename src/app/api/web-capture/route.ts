@@ -77,29 +77,20 @@ export async function POST(request: NextRequest) {
     const message = await payload.create({
       collection: 'messages',
       data: {
-        content: `🌐 Web Capture: ${title}`,
-        messageType: 'widget',
-        space: spaceId,
-        channel: channelId,
-        author: authorId || undefined,
-        tenant: space.tenant || tenantId,
-        timestamp: new Date().toISOString(),
-        atProtocol: {
-          type: 'co.kendev.spaces.message',
-          did: null,
-          uri: null,
-          cid: null,
+        content: {
+          type: 'system',
+          text: `🌐 Web Capture: ${title}`,
+          metadata: {
+            url,
+            title,
+            description,
+            captureSource: 'web_widget'
+          }
         },
-        widgetData: {
-          widgetType: 'web_capture',
-          widgetTitle: `Web Capture: ${title}`,
-          widgetData: webCaptureData,
-          isInteractive: true,
-          allowedRoles: ['all'],
-          expiresAt: null,
-          responses: {}
-        }
-      }
+        messageType: 'intelligence',
+        space: spaceId,
+        sender: authorId || 1,
+      },
     })
 
     // All data is stored in the message widget - no need for separate collection

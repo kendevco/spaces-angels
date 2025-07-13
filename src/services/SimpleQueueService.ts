@@ -2,15 +2,15 @@ import { Payload } from 'payload'
 
 // Simple types for the queue service
 type JobType = 'ai_generation' | 'photo_processing' | 'social_media' | 'revenue_analytics' | 'email_processing'
-type JobStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
+type JobStatus = 'pending' | 'processing' | 'completed' | 'failed'
 
 interface JobData {
-  id: string
-  tenant: string
-  type: JobType
+  id: number | string
+  tenant: number | string
+  jobType: JobType
   status: JobStatus
   priority: number
-  payload: any
+  data: any
   result?: any
   error?: string
   attempts: number
@@ -41,9 +41,9 @@ export class SimpleQueueService {
     const job = await this.payload.create({
       collection: 'job-queue',
       data: {
-        tenant: tenantId,
-        type,
-        payload,
+        tenant: parseInt(tenantId),
+        jobType: type,
+        data: payload,
         status: 'pending' as JobStatus,
         priority: options.priority || 0,
         maxAttempts: options.maxAttempts || 3,
@@ -171,34 +171,34 @@ export class SimpleQueueService {
     if (!job) return
 
     try {
-      await this.startProcessing(job.id)
+      await this.startProcessing(String(job.id))
       
       // Simple job processing based on type
       let result: any = null
       
-      switch (job.type) {
+      switch (job.jobType) {
         case 'ai_generation':
-          result = await this.processAIGeneration(job.payload)
+          result = await this.processAIGeneration(job.data)
           break
         case 'photo_processing':
-          result = await this.processPhoto(job.payload)
+          result = await this.processPhoto(job.data)
           break
         case 'social_media':
-          result = await this.processSocialMedia(job.payload)
+          result = await this.processSocialMedia(job.data)
           break
         case 'revenue_analytics':
-          result = await this.processRevenueAnalytics(job.payload)
+          result = await this.processRevenueAnalytics(job.data)
           break
         case 'email_processing':
-          result = await this.processEmail(job.payload)
+          result = await this.processEmail(job.data)
           break
         default:
-          throw new Error(`Unknown job type: ${job.type}`)
+          throw new Error(`Unknown job type: ${job.jobType}`)
       }
 
-      await this.completeJob(job.id, result)
+      await this.completeJob(String(job.id), result)
     } catch (error) {
-      await this.failJob(job.id, error instanceof Error ? error.message : 'Unknown error')
+      await this.failJob(String(job.id), error instanceof Error ? error.message : 'Unknown error')
     }
   }
 

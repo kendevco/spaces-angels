@@ -82,10 +82,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         const mockMessage = {
           id: Date.now(),
-          content: messageContent,
-          messageType: 'text' as const,
-          tenant: tenantId,
-          author: 1,
+          content: {
+            type: 'user',
+            text: messageContent
+          },
+          messageType: 'user' as const,
+          space: tenantId,
+          sender: 1,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }

@@ -3,9 +3,10 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Initialize Stripe only when we have the secret key (not during build)
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-05-28.basil' as any,
-})
+}) : null
 
 /**
  * Creator Subscription Creation API
@@ -15,6 +16,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
  */
 export async function POST(request: NextRequest) {
   try {
+    if (!stripe) {
+      return NextResponse.json({
+        error: 'Stripe configuration not available',
+        message: 'STRIPE_SECRET_KEY is not configured'
+      }, { status: 500 })
+    }
+
     const { spaceId, userId, tierType, customAmount } = await request.json()
 
     if (!spaceId || !userId) {
@@ -103,7 +111,21 @@ export async function POST(request: NextRequest) {
     // Calculate pricing
     const tier = space.monetization.subscriptionTiers?.find((t: any) => t.name === tierType)
     const amount = tier ? tier.price * 100 : 1000 // Default $10 if no tier
-    const revenueConfig = space.monetization.revenueShare
+    
+    // Construct revenue config from new shortened field names
+    const revenueConfig = {
+      agreementType: space.monetization.revenueAgreementType || 'standard',
+      platformFee: space.monetization.revenuePlatformFee || 20,
+      contractId: space.monetization.revenueContractId,
+      effectiveDate: space.monetization.revenueEffectiveDate,
+      reviewDate: space.monetization.revenueReviewDate,
+      // AI optimization fields
+      aiOptEnabled: space.monetization.aiOptEnabled,
+      aiOptVersion: space.monetization.aiOptVersion,
+      aiOptFactors: space.monetization.aiOptFactors,
+      aiOptFeeMin: space.monetization.aiOptFeeMin,
+      aiOptFeeMax: space.monetization.aiOptFeeMax
+    }
 
     const platformFeePercent = calculatePlatformFee(revenueConfig, space)
     const processingFeePercent = 2.9 // Stripe's processing fee
@@ -614,6 +636,13 @@ function meetsPerformanceThreshold(bonus: any, space: any): boolean {
  */
 export async function GET(request: NextRequest) {
   try {
+    if (!stripe) {
+      return NextResponse.json({
+        error: 'Stripe configuration not available',
+        message: 'STRIPE_SECRET_KEY is not configured'
+      }, { status: 500 })
+    }
+
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 

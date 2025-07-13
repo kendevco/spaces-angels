@@ -13,7 +13,7 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ message, showAvatar = true, className }: ChatMessageProps) {
-  const author = typeof message.author === 'object' ? message.author : null
+  const sender = typeof message.sender === 'object' ? message.sender : null
   const isWidget = (message as any).messageType === 'widget' || (message as any).widgetData
 
   return (
@@ -22,12 +22,12 @@ export function ChatMessage({ message, showAvatar = true, className }: ChatMessa
         {showAvatar && (
           <Avatar className="w-10 h-10 flex-shrink-0">
             <AvatarImage src={
-              author?.profileImage && typeof author.profileImage === 'object'
-                ? author.profileImage.url || undefined
+              sender?.profileImage && typeof sender.profileImage === 'object'
+                ? sender.profileImage.url || undefined
                 : undefined
             } />
             <AvatarFallback className="bg-blue-600 text-white">
-              {author?.email?.charAt(0).toUpperCase() || 'U'}
+              {sender?.email?.charAt(0).toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
         )}
@@ -36,7 +36,7 @@ export function ChatMessage({ message, showAvatar = true, className }: ChatMessa
           {showAvatar && (
             <div className="flex items-baseline space-x-2 mb-1">
               <span className="font-medium text-white">
-                {author?.name || author?.email || 'Unknown User'}
+                {sender?.name || sender?.email || 'Unknown User'}
               </span>
               <span className="text-xs text-gray-400">
                 {new Date(message.createdAt).toLocaleTimeString([], {
@@ -51,20 +51,23 @@ export function ChatMessage({ message, showAvatar = true, className }: ChatMessa
             <WidgetMessage message={message} />
           ) : (
             <div className="text-gray-300 break-words">
-              {message.content}
+              {typeof message.content === 'object' && message.content ? 
+                (message.content as any).text || JSON.stringify(message.content) :
+                message.content || 'No content'
+              }
             </div>
           )}
 
           {/* Message reactions */}
-          {message.reactions && message.reactions.length > 0 && (
+          {message.reactions && typeof message.reactions === 'object' && (
             <div className="flex flex-wrap gap-1 mt-2">
-              {message.reactions.map((reaction, index) => (
+              {Object.entries(message.reactions as Record<string, any>).map(([emoji, data], index) => (
                 <div
                   key={index}
                   className="flex items-center gap-1 bg-[#4c51584d] rounded-full px-2 py-1 text-xs"
                 >
-                  <span>{reaction.emoji}</span>
-                  <span className="text-gray-400">{reaction.count}</span>
+                  <span>{emoji}</span>
+                  <span className="text-gray-400">{Array.isArray(data) ? data.length : data.count || 0}</span>
                 </div>
               ))}
             </div>

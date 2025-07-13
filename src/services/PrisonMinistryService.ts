@@ -19,10 +19,13 @@ export class PrisonMinistryService {
     const donation = await payload.create({
       collection: 'donations',
       data: {
+        donationId: `prison-ministry-${Date.now()}`,
         amount,
-        recipientType,
+        donorName: 'Prison Ministry Service',
+        campaign: 'Prison Ministry Support',
+        paymentMethod: 'bank_transfer',
         status: 'pending',
-        ministryNote: 'Serving the least of these - Matthew 25:36'
+        donatedAt: new Date().toISOString()
       }
     })
     console.log(`[PrisonMinistry] Allocated $${amount} to ${recipientType} prisoners`)
