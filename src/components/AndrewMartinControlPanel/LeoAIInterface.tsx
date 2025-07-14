@@ -128,11 +128,11 @@ const LeoAIInterface: React.FC<LeoAIInterfaceProps> = ({ initialMessages = [] })
         alternatives: ["Let's explore together how we can help you achieve your goals in a way that aligns with human flourishing."]
       };
 
-      if (result.ethicalOverride) {
+        if (result.ethicalOverride) {
         return `I understand what you're asking, but I've chosen a different path. ${result.alternatives.join(' ')} My ethical framework suggests we approach this differently.`;
       }
 
-      return `I've analyzed your request through the lens of concentrated human wisdom. ${result.benevolentAssessment.humanFlourishing} Here's what I recommend: ${result.benevolentAssessment.suggestions?.join(' ')}`;
+          return `I've analyzed your request through the lens of concentrated human wisdom. ${result.benevolentAssessment.humanFlourishing} Here's what I recommend: ${result.benevolentAssessment.suggestions?.join(' ')}`;
     } catch (error) {
       console.error('Benevolent response generation error:', error);
       return generateWisdomResponse(userMessage);

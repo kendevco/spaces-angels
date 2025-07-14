@@ -521,10 +521,10 @@ Provide a helpful, contextually relevant response. If discussing the product, be
             department: context.businessContext.department,
             workflow: context.businessContext.workflow,
             customerJourney: context.businessContext.customerJourney,
-            sessionId: context.sessionId,
-            mode: message.mode,
-            productContext: context.productContext,
-            siteContext: context.siteContext
+              sessionId: context.sessionId,
+              mode: message.mode,
+              productContext: context.productContext,
+              siteContext: context.siteContext
           }
         }
       })

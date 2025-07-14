@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     tenants: Tenant;
     users: User;
+    workflows: Workflow;
     tenantMemberships: TenantMembership;
     spaceMemberships: SpaceMembership;
     appointments: Appointment;
@@ -114,6 +115,7 @@ export interface Config {
   collectionsSelect: {
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    workflows: WorkflowsSelect<false> | WorkflowsSelect<true>;
     tenantMemberships: TenantMembershipsSelect<false> | TenantMembershipsSelect<true>;
     spaceMemberships: SpaceMembershipsSelect<false> | SpaceMembershipsSelect<true>;
     appointments: AppointmentsSelect<false> | AppointmentsSelect<true>;
@@ -382,178 +384,81 @@ export interface Tenant {
   createdAt: string;
 }
 /**
- * Platform users with professional profiles and verification
- *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
-  /**
-   * User's first name
-   */
   firstName: string;
-  /**
-   * User's last name
-   */
   lastName: string;
-  /**
-   * Unique username (optional)
-   */
-  username?: string | null;
-  /**
-   * Full name (computed from firstName + lastName)
-   */
-  name?: string | null;
-  /**
-   * Global platform role - determines system-wide access
-   */
-  globalRole: 'super_admin' | 'platform_admin' | 'user';
-  /**
-   * Tenant this user belongs to - determines data access scope
-   */
-  tenant?: (number | null) | Tenant;
-  professionalProfile?: {
-    /**
-     * Professional title or position
-     */
-    title?: string | null;
-    /**
-     * Company or organization
-     */
-    company?: string | null;
-    /**
-     * Professional bio or description
-     */
-    bio?: string | null;
-    /**
-     * Personal or professional website
-     */
-    website?: string | null;
-    socialLinks?: {
-      /**
-       * LinkedIn profile URL
-       */
-      linkedin?: string | null;
-      /**
-       * Twitter/X profile URL
-       */
-      twitter?: string | null;
-      /**
-       * GitHub profile URL
-       */
-      github?: string | null;
-    };
-    /**
-     * Professional skills and expertise
-     */
-    skills?: string[] | null;
-    /**
-     * Professional certifications
-     */
-    certifications?: string[] | null;
-  };
-  /**
-   * Whether this user account is active
-   */
-  isActive?: boolean | null;
-  /**
-   * Last login timestamp
-   */
-  lastLoginAt?: string | null;
-  /**
-   * Profile picture
-   */
   profileImage?: (number | null) | Media;
-  privacySettings?: {
-    /**
-     * Who can view your profile
-     */
-    profileVisibility?: ('public' | 'members_only' | 'private') | null;
-    /**
-     * Allow other users to send direct messages
-     */
-    allowDirectMessages?: boolean | null;
-    /**
-     * Show when you are online
-     */
-    showOnlineStatus?: boolean | null;
-    /**
-     * Receive email notifications
-     */
-    emailNotifications?: boolean | null;
-  };
-  /**
-   * Whether this user is verified
-   */
-  isVerified?: boolean | null;
-  /**
-   * Level of verification completed
-   */
-  verificationLevel?: ('email' | 'phone' | 'identity' | 'business') | null;
-  /**
-   * Algorithmic trust score (0-100)
-   */
-  trustScore?: number | null;
-  /**
-   * Stripe Connect account for receiving payments as a creator
-   */
-  stripeConnect?: {
-    /**
-     * Stripe Connect account ID
-     */
-    stripeConnectAccountId?: string | null;
-    /**
-     * Status of Stripe Connect account
-     */
-    stripeAccountStatus?: ('none' | 'created' | 'pending_verification' | 'active' | 'deauthorized' | 'rejected') | null;
-    /**
-     * Stripe account details and capabilities
-     */
-    stripeAccountData?:
+  tenant: number | Tenant;
+  roles?: ('admin' | 'editor' | 'contributor' | 'subscriber' | 'guardian_angel')[] | null;
+  karma?: {
+    score?: number | null;
+    contributionTypes?:
+      | (
+          | 'content_creation'
+          | 'community_support'
+          | 'technical_contribution'
+          | 'mentorship'
+          | 'justice_advocacy'
+          | 'guardian_angel'
+        )[]
+      | null;
+    recognitions?:
       | {
-          [k: string]: unknown;
-        }
-      | unknown[]
-      | string
-      | number
-      | boolean
+          type:
+            | 'helpful_response'
+            | 'quality_content'
+            | 'community_leadership'
+            | 'technical_excellence'
+            | 'guardian_angel_action';
+          points: number;
+          reason?: string | null;
+          awardedBy?: (number | null) | User;
+          awardedAt?: string | null;
+          id?: string | null;
+        }[]
       | null;
     /**
-     * Whether account can receive payouts
+     * User has achieved Guardian Angel status through karma contributions
      */
-    payoutsEnabled?: boolean | null;
-    /**
-     * Whether account can accept payments
-     */
-    chargesEnabled?: boolean | null;
-    /**
-     * When Stripe Connect onboarding was completed
-     */
-    onboardingCompletedAt?: string | null;
+    guardianAngelStatus?: boolean | null;
   };
-  timezone?: ('America/New_York' | 'America/Chicago' | 'America/Denver' | 'America/Los_Angeles') | null;
-  theme?: ('light' | 'dark' | 'auto') | null;
-  /**
-   * Consolidated user preferences, including activity log, theme, timezone, and privacy settings. Managed programmatically.
-   */
-  preferences?:
+  tenantMemberships?:
     | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
+        tenant: number | Tenant;
+        role: 'owner' | 'admin' | 'editor' | 'contributor' | 'viewer';
+        joinedAt?: string | null;
+        permissions?:
+          | (
+              | 'manage_content'
+              | 'manage_products'
+              | 'manage_forms'
+              | 'view_analytics'
+              | 'manage_users'
+              | 'manage_settings'
+            )[]
+          | null;
+        id?: string | null;
+      }[]
     | null;
-  /**
-   * Tracks the status of JSON data migration for this user.
-   */
-  _migrationStatus?: {
-    jsonMigrated?: boolean | null;
-    migratedAt?: string | null;
-    migrationVersion?: string | null;
+  preferences?: {
+    notifications?: {
+      email?: boolean | null;
+      inApp?: boolean | null;
+      /**
+       * Receive alerts when Guardian Angel assistance is needed
+       */
+      guardianAngelAlerts?: boolean | null;
+    };
+    privacy?: {
+      profileVisibility?: ('public' | 'members' | 'private') | null;
+      karmaScoreVisible?: boolean | null;
+    };
   };
+  lastLoginAt?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -561,6 +466,8 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -665,6 +572,228 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workflows".
+ */
+export interface Workflow {
+  id: number;
+  /**
+   * Human-readable name for this workflow
+   */
+  name: string;
+  /**
+   * Detailed description of what this workflow does
+   */
+  description?: string | null;
+  tenant: number | Tenant;
+  status: 'active' | 'paused' | 'draft' | 'archived';
+  trigger: {
+    /**
+     * Which collection triggers this workflow
+     */
+    collection: 'posts' | 'pages' | 'products' | 'messages' | 'forms' | 'users' | 'orders';
+    /**
+     * What event triggers this workflow
+     */
+    event: 'created' | 'updated' | 'deleted' | 'published' | 'status_changed' | 'custom';
+    /**
+     * JSON conditions that must be met for workflow to trigger
+     */
+    conditions?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    /**
+     * Name of custom event to listen for
+     */
+    customEventName?: string | null;
+  };
+  steps: {
+    /**
+     * Human-readable name for this step
+     */
+    name: string;
+    type:
+      | 'create_record'
+      | 'update_record'
+      | 'send_email'
+      | 'send_sms'
+      | 'api_call'
+      | 'ai_analysis'
+      | 'conditional'
+      | 'delay'
+      | 'custom_function';
+    /**
+     * Configuration specific to this step type
+     */
+    config:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    /**
+     * Which collection this step operates on
+     */
+    targetCollection?: ('posts' | 'pages' | 'products' | 'messages' | 'forms' | 'users' | 'orders') | null;
+    automation: 'automated' | 'human_review' | 'ai_assisted' | 'manual';
+    /**
+     * Use AI to help with this step
+     */
+    aiAssisted?: boolean | null;
+    retryConfig?: {
+      maxRetries?: number | null;
+      /**
+       * Delay between retries in seconds
+       */
+      retryDelay?: number | null;
+    };
+    /**
+     * Order of execution (1, 2, 3, etc.)
+     */
+    order: number;
+    id?: string | null;
+  }[];
+  businessContext: {
+    /**
+     * Which department this workflow serves
+     */
+    department?: ('sales' | 'marketing' | 'operations' | 'support' | 'finance' | 'hr') | null;
+    /**
+     * What business process this workflow supports
+     */
+    process?:
+      | (
+          | 'lead_generation'
+          | 'customer_onboarding'
+          | 'order_processing'
+          | 'content_publishing'
+          | 'customer_support'
+          | 'project_management'
+          | 'quality_assurance'
+          | 'compliance'
+        )
+      | null;
+    priority: 'low' | 'normal' | 'high' | 'critical';
+  };
+  ethicalFramework?: {
+    /**
+     * Require human approval before executing this workflow
+     */
+    humanApprovalRequired?: boolean | null;
+    /**
+     * Bias detection checkpoints for AI-assisted steps
+     */
+    biasCheckpoints?:
+      | {
+          /**
+           * Description of bias check to perform
+           */
+          checkpoint: string;
+          /**
+           * Which step to check for bias
+           */
+          stepNumber: number;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Angel OS values this workflow aligns with
+     */
+    valueAlignment?:
+      | (
+          | 'guardian_angel'
+          | 'justice_advocacy'
+          | 'economic_empowerment'
+          | 'community_building'
+          | 'transparency'
+          | 'privacy_protection'
+        )[]
+      | null;
+    /**
+     * Can trigger Guardian Angel assistance if needed
+     */
+    guardianAngelTrigger?: boolean | null;
+  };
+  performance?: {
+    /**
+     * Total number of times this workflow has executed
+     */
+    executionCount?: number | null;
+    /**
+     * Number of successful executions
+     */
+    successCount?: number | null;
+    /**
+     * Number of failed executions
+     */
+    failureCount?: number | null;
+    /**
+     * Average execution time in seconds
+     */
+    averageExecutionTime?: number | null;
+    /**
+     * When this workflow last executed
+     */
+    lastExecutedAt?: string | null;
+  };
+  notifications?: {
+    /**
+     * Send notification when workflow completes successfully
+     */
+    notifyOnSuccess?: boolean | null;
+    /**
+     * Send notification when workflow fails
+     */
+    notifyOnFailure?: boolean | null;
+    /**
+     * Users to notify about workflow status
+     */
+    notificationRecipients?: (number | User)[] | null;
+    /**
+     * Slack webhook URL for notifications
+     */
+    slackWebhook?: string | null;
+  };
+  scheduling?: {
+    /**
+     * Run this workflow on a schedule instead of event-based
+     */
+    isScheduled?: boolean | null;
+    /**
+     * Cron expression for scheduled execution
+     */
+    cronExpression?: string | null;
+    timezone?: ('UTC' | 'America/New_York' | 'America/Chicago' | 'America/Denver' | 'America/Los_Angeles') | null;
+  };
+  /**
+   * Version number of this workflow
+   */
+  version?: number | null;
+  /**
+   * History of changes to this workflow
+   */
+  changeLog?:
+    | {
+        version: number;
+        changes: string;
+        changedBy: number | User;
+        changedAt: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * User memberships and roles within specific tenants
@@ -2579,119 +2708,121 @@ export interface Category {
  */
 export interface Order {
   id: number;
-  /**
-   * Auto-generated unique order number
-   */
   orderNumber: string;
-  /**
-   * Registered customer (if applicable)
-   */
-  customer?: (number | null) | User;
-  customerInfo: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    phone?: string | null;
-  };
-  billingAddress: {
-    street: string;
-    street2?: string | null;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: 'US' | 'CA' | 'GB' | 'AU';
-  };
-  shippingAddress?: {
-    /**
-     * Use billing address for shipping
-     */
-    sameAsBilling?: boolean | null;
-    street?: string | null;
-    street2?: string | null;
-    city?: string | null;
-    state?: string | null;
-    zipCode?: string | null;
-    country?: ('US' | 'CA' | 'GB' | 'AU') | null;
-  };
-  items: {
+  tenant: number | Tenant;
+  customer: number | User;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'completed' | 'cancelled' | 'refunded';
+  lineItems: {
     product: number | Product;
     quantity: number;
-    /**
-     * Price at time of purchase
-     */
-    price: number;
-    /**
-     * Line total (price × quantity)
-     */
-    total: number;
+    unitPrice: number;
+    totalPrice: number;
     /**
      * Product details at time of purchase
      */
-    productSnapshot?: {
-      title?: string | null;
-      sku?: string | null;
-      image?: (number | null) | Media;
-    };
+    productSnapshot?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
     id?: string | null;
   }[];
-  totals: {
+  subtotal: number;
+  taxAmount?: number | null;
+  shippingAmount?: number | null;
+  discountAmount?: number | null;
+  totalAmount: number;
+  currency: string;
+  revenueDistribution: {
     /**
-     * Sum of all line items
+     * AI Partner share (15%)
      */
-    subtotal: number;
-    tax?: number | null;
-    shipping?: number | null;
-    discount?: number | null;
+    aiPartner: number;
     /**
-     * Final total amount
+     * Human Partner share (30%)
      */
-    total: number;
-    currency: 'USD' | 'EUR' | 'GBP' | 'CAD';
+    humanPartner: number;
+    /**
+     * Platform Operations share (50%)
+     */
+    platformOperations: number;
+    /**
+     * Justice Fund share (5%)
+     */
+    justiceRund: number;
+    calculatedAt: string;
   };
-  payment: {
-    method: 'credit_card' | 'paypal' | 'stripe' | 'bank_transfer' | 'cod' | 'other';
-    status: 'pending' | 'processing' | 'paid' | 'failed' | 'refunded' | 'partially_refunded';
+  paymentStatus: 'pending' | 'authorized' | 'captured' | 'partially_refunded' | 'refunded' | 'failed';
+  paymentDetails?: {
+    paymentMethod?: ('credit_card' | 'paypal' | 'stripe' | 'bank_transfer' | 'crypto') | null;
     /**
-     * Payment processor transaction ID
+     * External payment processor transaction ID
      */
     transactionId?: string | null;
-    paidAt?: string | null;
+    /**
+     * Last 4 digits of payment method
+     */
+    last4?: string | null;
+    paymentProcessedAt?: string | null;
   };
-  shipping?: {
-    method?: ('standard' | 'express' | 'overnight' | 'pickup' | 'digital') | null;
+  fulfillment: {
+    method: 'digital' | 'physical' | 'service' | 'pickup';
+    status?: ('pending' | 'processing' | 'shipped' | 'delivered' | 'completed') | null;
     trackingNumber?: string | null;
     carrier?: ('ups' | 'fedex' | 'usps' | 'dhl' | 'other') | null;
     shippedAt?: string | null;
     deliveredAt?: string | null;
+    estimatedDelivery?: string | null;
   };
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded' | 'on_hold';
+  shippingAddress?: {
+    name?: string | null;
+    company?: string | null;
+    address1?: string | null;
+    address2?: string | null;
+    city?: string | null;
+    state?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+    phone?: string | null;
+  };
+  billingAddress?: {
+    sameAsShipping?: boolean | null;
+    name?: string | null;
+    company?: string | null;
+    address1?: string | null;
+    address2?: string | null;
+    city?: string | null;
+    state?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+  };
   /**
-   * Internal notes and customer communications
+   * Notes from customer during checkout
    */
-  notes?:
+  customerNotes?: string | null;
+  /**
+   * Internal notes for order processing
+   */
+  internalNotes?: string | null;
+  /**
+   * Additional order metadata and analytics
+   */
+  metadata?:
     | {
-        note: string;
-        /**
-         * Show this note to the customer
-         */
-        isCustomerVisible?: boolean | null;
-        addedBy?: (number | null) | User;
-        addedAt?: string | null;
-        id?: string | null;
-      }[]
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
     | null;
-  /**
-   * Which tenant this order belongs to
-   */
-  tenant: number | Tenant;
-  fulfillment?: {
-    /**
-     * Does this order require physical fulfillment?
-     */
-    requiresFulfillment?: boolean | null;
-    fulfilledAt?: string | null;
-    fulfilledBy?: (number | null) | User;
-  };
+  placedAt: string;
+  completedAt?: string | null;
+  cancelledAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -4856,6 +4987,10 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
+        relationTo: 'workflows';
+        value: number | Workflow;
+      } | null)
+    | ({
         relationTo: 'tenantMemberships';
         value: number | TenantMembership;
       } | null)
@@ -5143,61 +5278,53 @@ export interface TenantsSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   firstName?: T;
   lastName?: T;
-  username?: T;
-  name?: T;
-  globalRole?: T;
+  profileImage?: T;
   tenant?: T;
-  professionalProfile?:
+  roles?: T;
+  karma?:
     | T
     | {
-        title?: T;
-        company?: T;
-        bio?: T;
-        website?: T;
-        socialLinks?:
+        score?: T;
+        contributionTypes?: T;
+        recognitions?:
           | T
           | {
-              linkedin?: T;
-              twitter?: T;
-              github?: T;
+              type?: T;
+              points?: T;
+              reason?: T;
+              awardedBy?: T;
+              awardedAt?: T;
+              id?: T;
             };
-        skills?: T;
-        certifications?: T;
+        guardianAngelStatus?: T;
       };
-  isActive?: T;
+  tenantMemberships?:
+    | T
+    | {
+        tenant?: T;
+        role?: T;
+        joinedAt?: T;
+        permissions?: T;
+        id?: T;
+      };
+  preferences?:
+    | T
+    | {
+        notifications?:
+          | T
+          | {
+              email?: T;
+              inApp?: T;
+              guardianAngelAlerts?: T;
+            };
+        privacy?:
+          | T
+          | {
+              profileVisibility?: T;
+              karmaScoreVisible?: T;
+            };
+      };
   lastLoginAt?: T;
-  profileImage?: T;
-  privacySettings?:
-    | T
-    | {
-        profileVisibility?: T;
-        allowDirectMessages?: T;
-        showOnlineStatus?: T;
-        emailNotifications?: T;
-      };
-  isVerified?: T;
-  verificationLevel?: T;
-  trustScore?: T;
-  stripeConnect?:
-    | T
-    | {
-        stripeConnectAccountId?: T;
-        stripeAccountStatus?: T;
-        stripeAccountData?: T;
-        payoutsEnabled?: T;
-        chargesEnabled?: T;
-        onboardingCompletedAt?: T;
-      };
-  timezone?: T;
-  theme?: T;
-  preferences?: T;
-  _migrationStatus?:
-    | T
-    | {
-        jsonMigrated?: T;
-        migratedAt?: T;
-        migrationVersion?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -5205,6 +5332,8 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -5214,6 +5343,99 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workflows_select".
+ */
+export interface WorkflowsSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  tenant?: T;
+  status?: T;
+  trigger?:
+    | T
+    | {
+        collection?: T;
+        event?: T;
+        conditions?: T;
+        customEventName?: T;
+      };
+  steps?:
+    | T
+    | {
+        name?: T;
+        type?: T;
+        config?: T;
+        targetCollection?: T;
+        automation?: T;
+        aiAssisted?: T;
+        retryConfig?:
+          | T
+          | {
+              maxRetries?: T;
+              retryDelay?: T;
+            };
+        order?: T;
+        id?: T;
+      };
+  businessContext?:
+    | T
+    | {
+        department?: T;
+        process?: T;
+        priority?: T;
+      };
+  ethicalFramework?:
+    | T
+    | {
+        humanApprovalRequired?: T;
+        biasCheckpoints?:
+          | T
+          | {
+              checkpoint?: T;
+              stepNumber?: T;
+              id?: T;
+            };
+        valueAlignment?: T;
+        guardianAngelTrigger?: T;
+      };
+  performance?:
+    | T
+    | {
+        executionCount?: T;
+        successCount?: T;
+        failureCount?: T;
+        averageExecutionTime?: T;
+        lastExecutedAt?: T;
+      };
+  notifications?:
+    | T
+    | {
+        notifyOnSuccess?: T;
+        notifyOnFailure?: T;
+        notificationRecipients?: T;
+        slackWebhook?: T;
+      };
+  scheduling?:
+    | T
+    | {
+        isScheduled?: T;
+        cronExpression?: T;
+        timezone?: T;
+      };
+  version?: T;
+  changeLog?:
+    | T
+    | {
+        version?: T;
+        changes?: T;
+        changedBy?: T;
+        changedAt?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5936,97 +6158,86 @@ export interface ProductsSelect<T extends boolean = true> {
  */
 export interface OrdersSelect<T extends boolean = true> {
   orderNumber?: T;
+  tenant?: T;
   customer?: T;
-  customerInfo?:
+  status?: T;
+  lineItems?:
     | T
     | {
-        email?: T;
-        firstName?: T;
-        lastName?: T;
+        product?: T;
+        quantity?: T;
+        unitPrice?: T;
+        totalPrice?: T;
+        productSnapshot?: T;
+        id?: T;
+      };
+  subtotal?: T;
+  taxAmount?: T;
+  shippingAmount?: T;
+  discountAmount?: T;
+  totalAmount?: T;
+  currency?: T;
+  revenueDistribution?:
+    | T
+    | {
+        aiPartner?: T;
+        humanPartner?: T;
+        platformOperations?: T;
+        justiceRund?: T;
+        calculatedAt?: T;
+      };
+  paymentStatus?: T;
+  paymentDetails?:
+    | T
+    | {
+        paymentMethod?: T;
+        transactionId?: T;
+        last4?: T;
+        paymentProcessedAt?: T;
+      };
+  fulfillment?:
+    | T
+    | {
+        method?: T;
+        status?: T;
+        trackingNumber?: T;
+        carrier?: T;
+        shippedAt?: T;
+        deliveredAt?: T;
+        estimatedDelivery?: T;
+      };
+  shippingAddress?:
+    | T
+    | {
+        name?: T;
+        company?: T;
+        address1?: T;
+        address2?: T;
+        city?: T;
+        state?: T;
+        postalCode?: T;
+        country?: T;
         phone?: T;
       };
   billingAddress?:
     | T
     | {
-        street?: T;
-        street2?: T;
+        sameAsShipping?: T;
+        name?: T;
+        company?: T;
+        address1?: T;
+        address2?: T;
         city?: T;
         state?: T;
-        zipCode?: T;
+        postalCode?: T;
         country?: T;
       };
-  shippingAddress?:
-    | T
-    | {
-        sameAsBilling?: T;
-        street?: T;
-        street2?: T;
-        city?: T;
-        state?: T;
-        zipCode?: T;
-        country?: T;
-      };
-  items?:
-    | T
-    | {
-        product?: T;
-        quantity?: T;
-        price?: T;
-        total?: T;
-        productSnapshot?:
-          | T
-          | {
-              title?: T;
-              sku?: T;
-              image?: T;
-            };
-        id?: T;
-      };
-  totals?:
-    | T
-    | {
-        subtotal?: T;
-        tax?: T;
-        shipping?: T;
-        discount?: T;
-        total?: T;
-        currency?: T;
-      };
-  payment?:
-    | T
-    | {
-        method?: T;
-        status?: T;
-        transactionId?: T;
-        paidAt?: T;
-      };
-  shipping?:
-    | T
-    | {
-        method?: T;
-        trackingNumber?: T;
-        carrier?: T;
-        shippedAt?: T;
-        deliveredAt?: T;
-      };
-  status?: T;
-  notes?:
-    | T
-    | {
-        note?: T;
-        isCustomerVisible?: T;
-        addedBy?: T;
-        addedAt?: T;
-        id?: T;
-      };
-  tenant?: T;
-  fulfillment?:
-    | T
-    | {
-        requiresFulfillment?: T;
-        fulfilledAt?: T;
-        fulfilledBy?: T;
-      };
+  customerNotes?: T;
+  internalNotes?: T;
+  metadata?: T;
+  placedAt?: T;
+  completedAt?: T;
+  cancelledAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

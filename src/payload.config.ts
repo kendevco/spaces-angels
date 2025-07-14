@@ -16,6 +16,7 @@ import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Products } from './collections/Products'
 import { Users } from './collections/Users'
+import { Workflows } from './collections/Workflows'
 import { Tenants } from './collections/Tenants'
 import { Organizations } from './collections/Organizations'
 import { Venues } from './collections/Venues'
@@ -102,7 +103,8 @@ export default buildConfig({
   // database-adapter-config-end
   collections: [
     Tenants, 
-    Users, 
+    Users,
+    Workflows, 
     TenantMemberships, 
     SpaceMemberships, 
     Appointments, 

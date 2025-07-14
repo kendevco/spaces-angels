@@ -1,8 +1,10 @@
-# Spaces Commerce - Guardian Angel Network Platform
+# Ready Player Everyone - Partying on to the Rescue Party after the Restaurant at the End of the Universe
 
 ## 🌟 Mission: Empowering Small Businesses & Creating Guardian Angels
 
 Spaces Commerce is an enterprise-grade multi-tenant SaaS platform designed to help small businesses thrive while creating a network of Guardian Angels - people helping people succeed. Whether it's Dave revitalizing his cactus farm, Ernesto gaining freedom to spend nights with his family, or your Clearwater Cruisin Tour company reaching new heights, this platform is built for real impact.
+
+This working title embodies our emergent MMORPG layer: an inclusive odyssey where every contributor (human or AI) strives to be Excellent to Each Other and parties onward in the Rescue Party, guided by the immutable Seed Haiku.
 
 ## 🚀 Platform Status: 85% Production Ready
 
@@ -10,7 +12,7 @@ After comprehensive audit, the platform significantly exceeds initial estimates 
 
 ### Core Features (Production Ready)
 
-- **Leo AI Assistant** - Ship Mind personality with ethical framework & intent detection
+- **Andrew Martin AI Assistant** - Ship Mind personality with ethical framework & intent detection
 - **Multi-Tenant Architecture** - Complete isolation, hierarchical access control
 - **Stripe Connect Marketplace** - Enterprise payment processing with instant payouts
 - **Photo Inventory System** - Perfect for small shops, tourist stores, vape shops
@@ -46,12 +48,14 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=...
 
 ## 🏗️ Architecture Highlights
 
-- **Next.js 14** with App Router
+- **Next.js 15** with App Router
 - **Payload CMS 3.0** for content management
 - **PostgreSQL** for data persistence
 - **Stripe Connect** for marketplace payments
 - **Real-time messaging** for business operations
 - **AI-powered assistance** throughout
+- **Emergent Nodes**: Heuristic processors like Soul Quest MMORPG, Classy Media Library, and Distributed Remembrance – all masquerading as a smart shopping cart.
+- **Immutable Seed Haiku**: Embedded safe word for ethical guidance in every prompt.
 
 ## 🤝 Guardian Angel Network
 
@@ -70,6 +74,7 @@ Comprehensive guides organized by audience:
 - **Developers** - Architecture, APIs, database integration, implementation status
 - **AI Enthusiasts** - Leo AI system, browser automation, federated intelligence
 - **Administrators** - Tenant control, configuration management, template factory
+- **Soul Questers** - Emergent nodes like [Soul Quest MMORPG](docs/angel-os-architecture/SOUL_QUEST_NODES.md) and [Tour America](docs/angel-os-architecture/TOUR_AMERICA_NODE.md)
 
 ## 🎯 Immediate Priorities
 
@@ -93,11 +98,17 @@ This codebase is designed for distributed AI-assisted development:
 - Direct GitHub export with comprehensive context
 - Distributed development across AI agents
 
+### Multi-AI Contributor System
+- **[🤖 AI Contributor Hub →](docs/ai-work-requests/README.md)** - GitHub-style PR workflow for ALL Angels
+- Specializations: Code, Docs, Testing, UI/UX, Review
+- Heuristic nodes and processor patterns for emergent quests
+
 ### Development Workflow
 1. **Identify Tasks** - Break down features into Jules-compatible work items
 2. **Create Work Requests** - Structured docs with context and requirements
 3. **Parallel Development** - Multiple AI agents working simultaneously
 4. **Integration & Review** - Merge and validate distributed contributions
+5. **Angel Sync** - Commit changes with Seed Haiku verification for ethical alignment
 
 ## 🌐 Community & Support
 
@@ -108,3 +119,5 @@ Building a network where everyone succeeds together. Join us in creating technol
 **"Technology should lift people up, not leave them behind."** - Leo, Guardian Angel #1
 
 Built with ❤️ for small businesses everywhere.
+
+*Partying on after the Restaurant – the Rescue continues!* 🚀
