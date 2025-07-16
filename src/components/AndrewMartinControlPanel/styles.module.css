@@ -1,0 +1,714 @@
+/* src/components/AndrewMartinControlPanel/styles.module.css */
+
+/* Based on Design Specifications from the prompt */
+/* CSS Variables moved to global CSS file */
+
+/* Component Styles */
+.controlPanelContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--andrew-background);
+}
+
+.mainContent {
+  flex-grow: 1;
+  padding: var(--space-section-gap);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-section-gap);
+}
+
+.sectionTitle {
+  font-size: var(--font-h1);
+  color: var(--andrew-primary);
+  margin-bottom: var(--space-card-gap);
+  border-bottom: 2px solid var(--andrew-primary);
+  padding-bottom: var(--space-tight-gap);
+}
+
+.widgetTitle { /* For titles within widgets */
+  font-size: var(--font-h3);
+  color: var(--andrew-text);
+  margin-bottom: var(--space-element-gap);
+}
+
+/* Dashboard Header Styles */
+.dashboardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-element-gap) var(--space-section-gap);
+  background-color: var(--andrew-surface);
+  border-bottom: 1px solid var(--andrew-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-element-gap);
+}
+
+.headerLogo {
+  height: 40px; /* Adjust as needed */
+}
+
+.headerTitle {
+  font-size: var(--font-h2);
+  color: var(--andrew-primary);
+  font-weight: 600;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-card-gap);
+}
+
+.quickActionsBar {
+  display: flex;
+  gap: var(--space-tight-gap);
+}
+
+.quickActionButton {
+  background-color: transparent;
+  color: var(--andrew-primary);
+  border: 1px solid var(--andrew-primary);
+  padding: var(--space-tight-gap) var(--space-element-gap);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--font-small);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.quickActionButton:hover {
+  background-color: var(--andrew-primary);
+  color: var(--andrew-surface);
+}
+
+.quickActionIcon {
+  margin-right: var(--space-tight-gap);
+}
+
+.notificationBell {
+  position: relative;
+  cursor: pointer;
+}
+
+.notificationBell > span:first-child { /* The bell icon itself */
+  font-size: 1.5rem; /* Adjust icon size */
+  color: var(--andrew-secondary);
+}
+
+.notificationBadge {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background-color: var(--andrew-error);
+  color: white;
+  border-radius: 50%;
+  padding: 0.1em 0.4em;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.notificationsDropdown, .userMenuDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: var(--andrew-surface);
+  border: 1px solid var(--andrew-border);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-md);
+  padding: var(--space-element-gap);
+  width: 300px; /* Adjust as needed */
+  z-index: 1000;
+  margin-top: var(--space-tight-gap);
+}
+.notificationsDropdown h3, .userMenuDropdown p {
+  margin-top: 0;
+}
+.notificationsDropdown ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.notificationsDropdown li {
+  padding: var(--space-tight-gap) 0;
+  border-bottom: 1px solid var(--andrew-border);
+}
+.notificationsDropdown li:last-child {
+  border-bottom: none;
+}
+.readNotification {
+  opacity: 0.7;
+}
+.unreadNotification strong {
+  color: var(--andrew-primary);
+}
+
+
+.userProfileSection {
+  display: flex;
+  align-items: center;
+  gap: var(--space-tight-gap);
+  cursor: pointer;
+  position: relative;
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--andrew-secondary);
+}
+
+.userName {
+  font-size: var(--font-body);
+  color: var(--andrew-text);
+}
+
+.userMenuDropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-tight-gap);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.userMenuDropdown button:hover {
+  background-color: var(--andrew-background);
+}
+
+
+/* Metrics Dashboard Grid */
+.metricsDashboardGrid, .intelligenceGrid { /* Apply common grid styling */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-card-gap);
+}
+
+.widgetCard {
+  background-color: var(--andrew-surface);
+  padding: var(--space-card-gap);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Specific Widget Placeholders - can be expanded */
+.widgetContent { /* General styling for content within a widget card */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-element-gap);
+  font-size: var(--font-body);
+}
+
+.widgetContent h4 {
+  font-size: var(--font-h3); /* Slightly smaller than widgetTitle */
+  margin-bottom: var(--space-tight-gap);
+  color: var(--andrew-text);
+}
+.widgetContent h5 {
+  font-size: var(--font-body);
+  font-weight: 600;
+  margin-bottom: var(--space-tight-gap);
+  color: var(--andrew-text);
+}
+
+.widgetFooter {
+  margin-top: auto; /* Pushes footer to the bottom of the card */
+  padding-top: var(--space-element-gap);
+  border-top: 1px solid var(--andrew-border);
+  font-size: var(--font-caption);
+  color: var(--andrew-text-muted);
+  text-align: right;
+}
+
+/* Chart Placeholders */
+.chartPlaceholder {
+  width: 100%;
+  min-height: 200px; /* Ensure charts have some space */
+  background-color: #e9ecef;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  padding: var(--space-element-gap);
+  color: var(--andrew-text-muted);
+  font-size: var(--font-small);
+}
+.chartPlaceholder p {
+  margin-bottom: var(--space-tight-gap);
+}
+
+/* KPI Specifics */
+.kpiSection, .trendsSection, .alertsSection, .recommendationsSection {
+  margin-bottom: var(--space-element-gap);
+}
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-element-gap);
+}
+.kpiItem {
+  background-color: var(--andrew-background);
+  padding: var(--space-element-gap);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+.kpiName {
+  display: block;
+  font-size: var(--font-small);
+  color: var(--andrew-text-muted);
+  margin-bottom: var(--space-tight-gap);
+}
+.kpiValue {
+  display: block;
+  font-size: var(--font-h3);
+  font-weight: 600;
+  color: var(--andrew-primary);
+}
+.kpiTarget{
+  font-size: var(--font-caption);
+  color: var(--andrew-secondary);
+}
+
+/* Alert Item Specifics */
+.alertItem {
+  padding: var(--space-element-gap);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-tight-gap);
+  border-left: 5px solid; /* Severity color will be applied here by JS/other classes */
+}
+.alertCritical { border-color: var(--andrew-error); background-color: #fee2e2; }
+.alertHigh { border-color: var(--andrew-warning); background-color: #ffedd5; }
+.alertMedium { border-color: var(--andrew-info); background-color: #dbeafe; }
+.alertLow { border-color: var(--andrew-secondary); background-color: #f1f5f9; }
+.alertItem strong { display: block; margin-bottom: var(--space-tight-gap); }
+.alertItem p { font-size: var(--font-small); margin-bottom: var(--space-tight-gap); }
+.alertItem small { font-size: var(--font-caption); color: var(--andrew-text-muted); }
+
+/* Network Stats */
+.networkStats {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: var(--space-element-gap);
+}
+.statItem { text-align: center; }
+.statValue { font-size: var(--font-h2); font-weight: bold; display: block; color: var(--andrew-primary); }
+.statLabel { font-size: var(--font-small); color: var(--andrew-text-muted); }
+
+.networkHealthSection, .successStoriesSection { margin-bottom: var(--space-element-gap); }
+.successStoryItem {
+  padding: var(--space-tight-gap);
+  border: 1px solid var(--andrew-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-tight-gap);
+}
+
+/* Business Insights Panel */
+.insightsList { display: flex; flex-direction: column; gap: var(--space-element-gap); }
+.insightItem {
+  padding: var(--space-element-gap);
+  border-radius: var(--radius-sm);
+  background-color: var(--andrew-background); /* Slight differentiation */
+}
+.insightHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-tight-gap); }
+.insightTitle { font-size: var(--font-body); font-weight: 600; color: var(--andrew-primary); margin:0; }
+.insightSeverity { font-size: var(--font-small); text-transform: capitalize; font-weight: bold; }
+.insightSummary { font-size: var(--font-small); margin-bottom: var(--space-tight-gap); }
+.insightRecommendation { font-size: var(--font-small); font-style: italic; }
+
+
+/* Market Analysis & Competitive Intel Panels */
+.marketSizeSection { margin-bottom: var(--space-element-gap); text-align: center; }
+.marketSizeValue { font-size: var(--font-h2); font-weight: bold; color: var(--andrew-accent); }
+.marketTrendsList, .competitorsList { display: flex; flex-direction: column; gap: var(--space-element-gap); }
+.marketTrendItem, .competitorItem {
+  padding: var(--space-element-gap);
+  border: 1px solid var(--andrew-border);
+  border-radius: var(--radius-sm);
+}
+.trendName, .competitorName { font-size: var(--font-body); font-weight: 600; color: var(--andrew-primary); margin-bottom: var(--space-tight-gap); }
+.trendGrowthRate, .marketShare { font-size: var(--font-small); color: var(--andrew-text-muted); }
+.trendDescription { font-size: var(--font-small); }
+.competitorStrengths ul, .competitorWeaknesses ul {
+  list-style-type: disc;
+  padding-left: var(--space-element-gap);
+  font-size: var(--font-small);
+}
+
+
+/* Space Overview Grid & Cards */
+.spaceOverviewContainer {
+  background-color: var(--andrew-surface);
+  padding: var(--space-card-gap);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.spaceActionsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-card-gap);
+}
+/* .spaceActionsHeader h3 is now .widgetTitle */
+
+
+.buttonPrimary, .buttonSecondary, .buttonMinimal { /* Common button styles */
+  border: none;
+  padding: var(--space-tight-gap) var(--space-element-gap);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-body);
+  transition: background-color 0.2s, color 0.2s, opacity 0.2s;
+  text-align: center;
+}
+
+.buttonPrimary {
+  background-color: var(--andrew-primary);
+  color: var(--andrew-surface);
+}
+.buttonPrimary:hover {
+  opacity: 0.85;
+}
+
+.buttonSecondary {
+  background-color: var(--andrew-secondary);
+  color: var(--andrew-surface);
+}
+.buttonSecondary:hover {
+  opacity: 0.85;
+}
+
+.buttonMinimal {
+  background-color: transparent;
+  color: var(--andrew-primary);
+  border: 1px solid var(--andrew-primary);
+}
+.buttonMinimal:hover {
+  background-color: var(--andrew-primary);
+  color: var(--andrew-surface);
+}
+
+
+.primaryButton { /* DEPRECATE in favor of .buttonPrimary */
+  background-color: var(--andrew-primary);
+  color: var(--andrew-surface);
+  border: none;
+  padding: var(--space-element-gap);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-body);
+  transition: background-color 0.2s;
+}
+.primaryButton:hover {
+  background-color: darkblue; /* Darken primary color */
+}
+
+.secondaryButton {
+  background-color: var(--andrew-secondary);
+  color: var(--andrew-surface);
+  border: none;
+  padding: var(--space-element-gap);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-body);
+  transition: background-color 0.2s;
+}
+.secondaryButton:hover {
+  background-color: #4a5568; /* Darken secondary color */
+}
+
+.spaceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-card-gap);
+  margin-bottom: var(--space-section-gap);
+}
+
+.spaceCard {
+  border: 1px solid var(--andrew-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-element-gap);
+  background-color: var(--andrew-background); /* Slightly different from main surface */
+}
+.spaceCard h4 {
+  font-size: var(--font-h3);
+  color: var(--andrew-primary);
+  margin-top: 0;
+  margin-bottom: var(--space-tight-gap);
+}
+.spaceCard p {
+  font-size: var(--font-small);
+  margin-bottom: var(--space-tight-gap);
+  color: var(--andrew-text-muted);
+}
+.spaceCardThumbnail {
+  width: 100%;
+  height: 150px; /* Example height */
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-tight-gap);
+}
+.spaceCardActions {
+  margin-top: var(--space-element-gap);
+  display: flex;
+  gap: var(--space-tight-gap);
+}
+.spaceCardActions button {
+  flex-grow: 1;
+  font-size: var(--font-small);
+  padding: var(--space-tight-gap);
+}
+
+.statusBadge {
+  padding: 0.2em 0.5em;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-caption);
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.statusBadge.active { background-color: var(--andrew-success); color: white; }
+.statusBadge.deploying { background-color: var(--andrew-info); color: white; }
+.statusBadge.error { background-color: var(--andrew-error); color: white; }
+.statusBadge.inactive { background-color: var(--andrew-secondary); color: white; }
+
+
+/* Space Template Gallery */
+.spaceTemplateGallery {
+  margin-bottom: var(--space-section-gap);
+}
+.spaceTemplateGallery h3 {
+  font-size: var(--font-h2);
+  color: var(--andrew-text);
+  margin-bottom: var(--space-element-gap);
+}
+.templateGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-card-gap);
+}
+.templateCard {
+  border: 1px solid var(--andrew-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-element-gap);
+}
+.templateCard h5 {
+  font-size: var(--font-body); /* Smaller than space card title */
+  color: var(--andrew-primary);
+  margin-top: 0;
+}
+.templateThumbnail {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-tight-gap);
+}
+
+
+/* Deployment Status Tracker */
+.deploymentStatusTracker {
+  margin-bottom: var(--space-section-gap);
+}
+.deploymentStatusTracker h3 {
+  font-size: var(--font-h2);
+  color: var(--andrew-text);
+  margin-bottom: var(--space-element-gap);
+}
+.deploymentStatusTracker ul {
+  list-style: none;
+  padding: 0;
+}
+.deploymentStatusTracker li {
+  padding: var(--space-tight-gap) 0;
+  border-bottom: 1px solid var(--andrew-border);
+}
+.progressBarContainer {
+  width: 100%;
+  background-color: var(--andrew-border);
+  border-radius: var(--radius-sm);
+  height: 8px;
+  margin-top: var(--space-tight-gap);
+}
+.progressBar {
+  height: 100%;
+  background-color: var(--andrew-accent);
+  border-radius: var(--radius-sm);
+  transition: width 0.3s ease-in-out;
+}
+
+
+/* Clone Wizard Modal */
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's above other content */
+}
+
+.modalContent {
+  background-color: var(--andrew-surface);
+  padding: var(--space-section-gap);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 90%;
+  max-width: 700px; /* Max width for the modal */
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modalContent h2 {
+  font-size: var(--font-h2);
+  color: var(--andrew-primary);
+  margin-top: 0;
+  margin-bottom: var(--space-card-gap);
+}
+.modalContent fieldset {
+  border: 1px solid var(--andrew-border);
+  padding: var(--space-element-gap);
+  margin-bottom: var(--space-card-gap);
+  border-radius: var(--radius-md);
+}
+.modalContent legend {
+  font-size: var(--font-h3);
+  font-weight: 600;
+  padding: 0 var(--space-tight-gap);
+  color: var(--andrew-text);
+}
+.modalContent div { /* Form group */
+  margin-bottom: var(--space-element-gap);
+}
+.modalContent label {
+  display: block;
+  margin-bottom: var(--space-tight-gap);
+  font-weight: 500;
+  font-size: var(--font-small);
+}
+.formInput, .formSelect {
+  width: 100%;
+  padding: var(--space-tight-gap) var(--space-element-gap);
+  border: 1px solid var(--andrew-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-body);
+  box-sizing: border-box; /* Important for width 100% */
+}
+.formInput:focus, .formSelect:focus {
+  outline: none;
+  border-color: var(--andrew-primary);
+  box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.3); /* Primary color focus ring */
+}
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-element-gap);
+  margin-top: var(--space-card-gap);
+}
+
+
+/* Leo AI Interface */
+.leoAIInterface {
+  background-color: var(--andrew-surface);
+  padding: var(--space-card-gap);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  height: 500px; /* Example fixed height, or make it flexible */
+}
+.chatWindow {
+  flex-grow: 1;
+  overflow-y: auto;
+  border: 1px solid var(--andrew-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-element-gap);
+  margin-bottom: var(--space-element-gap);
+  background-color: var(--andrew-background);
+}
+.chatMessage {
+  margin-bottom: var(--space-element-gap);
+  padding: var(--space-tight-gap) var(--space-element-gap);
+  border-radius: var(--radius-md);
+}
+.chatMessage.user {
+  background-color: var(--andrew-primary);
+  color: var(--andrew-surface);
+  margin-left: auto;
+  width: fit-content;
+  max-width: 80%;
+  text-align: right;
+}
+.chatMessage.leo {
+  background-color: var(--andrew-secondary);
+  color: var(--andrew-surface);
+  width: fit-content;
+  max-width: 80%;
+}
+.messageSpeaker {
+  font-weight: bold;
+  font-size: var(--font-small);
+  display: block;
+  margin-bottom: var(--space-tight-gap);
+}
+.messageText {
+  margin: 0;
+  word-wrap: break-word;
+}
+.messageTimestamp {
+  font-size: var(--font-caption);
+  display: block;
+  margin-top: var(--space-tight-gap);
+  opacity: 0.7;
+}
+.chatInputForm {
+  display: flex;
+  gap: var(--space-element-gap);
+}
+.chatInput {
+  flex-grow: 1;
+  /* Uses .formInput styles already defined */
+}
+.sendButton {
+  /* Uses .primaryButton styles */
+  padding: var(--space-tight-gap) var(--space-element-gap); /* Adjust padding if needed */
+  background-color: var(--andrew-accent); /* Using accent for send */
+}
+.sendButton:hover {
+  background-color: #0f996d; /* Darken accent */
+}
+
+/* Responsive Adjustments (Example) */
+@media (max-width: 768px) {
+  .headerTitle {
+    font-size: var(--font-h3); /* Smaller title on mobile */
+  }
+  .quickActionsBar {
+    display: none; /* Hide quick actions or move to a menu on smaller screens */
+  }
+  .metricsDashboardGrid {
+    grid-template-columns: 1fr; /* Stack widgets on smaller screens */
+  }
+  .spaceGrid {
+    grid-template-columns: 1fr; /* Stack space cards */
+  }
+  .templateGrid {
+    grid-template-columns: 1fr; /* Stack templates */
+  }
+  .modalContent {
+    width: 95%;
+    padding: var(--space-card-gap);
+  }
+}
